@@ -1,3 +1,5 @@
+import sys
+
 class mapgen_class:
     floor = 0
     wall = 1
