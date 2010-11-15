@@ -6,6 +6,7 @@ import sys
 import os
 import pickle
 from constant import const_class
+import time
 
 #don't be hatin
 if not len(sys.argv) == 3:
