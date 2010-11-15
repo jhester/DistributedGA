@@ -1,0 +1,43 @@
+SCM SETUP AND USE - CPSC 362 - Final Project 
+Josiah Hester, Ashley Anderson, Justin Reid
+
+==============================================
+Steps:
+1. Setup a login ID on github.com
+2. Setup GIT on your machine, command line accessible.
+3. Setup your username and email for git on your machine. Make sure this matches your github email and login to associate changes.
+
+$ git config --global user.name "Tekkub"
+$ git config --global user.email "tekkub@gmail.com"
+
+4. SSH keys???
+5. Clone the repository to local machine.
+
+$ git clone https://your_git_username@github.com/jhester/DistributedGA.git
+
+6. cd DistributedGA/
+
+7. Now setup git remote so that you can push, and pull changes to and from the master repository.  Todo this, instead of using git remote we will just pull with the URL of the repository. This will automatically add the host to the remote.
+
+$ git pull https://your_github_name@github.com/jhester/DistributedGA.git
+
+8. Hopefully your setup to run these commands now.
+
+==============================================
+BASIC LOCAL COMMANDS - http://gitref.org/basic/
+Get the status of the repo:
+	git status -s
+
+Add a file to version control:
+	git add file_name
+
+Commit a snapshot of the local repo (note this will not update the MASTER repo online):
+	git commit -m 'Updated file blah, make sure this is an informative commit message.' -a
+
+==============================================
+BASIC ONLINE COMMANDS - http://gitref.org/remotes/
+Update your local repository (If this doesn't work then you didn't set up your remote repositories correctly)
+	git pull
+
+Update the master repository. Push your changes. (MAKE SURE YOU PULL BEFORE YOU PUSH OR YOU OVERWRITE THE MASTER)
+	git push
