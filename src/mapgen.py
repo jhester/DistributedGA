@@ -88,8 +88,3 @@ class mapgen_class:
         if self.map[x][y] == self.floor:
             return 1
         return 0
-
-
-map = mapgen_class(40,40)
-list = []
-map.printGrid(list)
