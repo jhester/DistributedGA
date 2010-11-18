@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import SocketServer
 import pickle
 import sys
