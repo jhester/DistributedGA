@@ -5,8 +5,10 @@ import socket
 import sys
 import os
 import pickle
-from constant import constant_class
 import time
+
+from constant import constant_class
+from mapgen import mapgen_class
 
 #don't be hatin
 if not len(sys.argv) == 3:
@@ -25,16 +27,38 @@ print "Observer Connected on "+str(host)+":"+str(port)
 #send observer code to server
 s.send(str(constant_class.observercode))
 
+#recv map data
+mapdata = s.recv(8096).strip()
+mapdata = pickle.loads(mapdata)
+map = mapgen_class(40,40)
+map.map = mapdata
+print "Map data recieved"
+
+#init
+players = {}
+
 #main loop
-s.settimeout(2)
+s.settimeout(5)
 while 1:
-    data = s.recv(4048).strip()
+    #recv player id/position
+    data = s.recv(2048).strip()
     data = pickle.loads(data)
-    
+    (id, pos) = data
+
+    #add to dictionary (pos is an x/y pair)
+    players[id] = pos
+
+    #display
     time.sleep(0.25)
     os.system('clear')
 
-    for i in data:
-        print i
+    #convert dictionary to list
+    list = []
+    for key in players.keys():
+        list.append(players[key])
+
+    #display list...
+    map.printGrid(list)
+
         
 s.close()
