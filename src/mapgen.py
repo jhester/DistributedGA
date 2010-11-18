@@ -1,15 +1,19 @@
 import sys
 import random
+import time
+import os
 
 class mapgen_class:
     floor = 0
     wall = 1
     map = []
+    fillPrecentage = 0.75
 
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.buildGrid(self.floor)
+        self.totalArea = width*height
+        self.buildGrid(self.wall)
         self.fillGrid()
         
     #fill the map with 1 tile type
@@ -67,24 +71,106 @@ class mapgen_class:
                 localmap[x].append(self.map[gridx+x][gridy+y])
         return localmap
         
-    #add walls to the map
+    #add floor to the map
     def fillGrid(self):
+        #create an initial room
+        x = int(random.random()*self.width)
+        y = int(random.random()*self.height)
+        w = int(random.random()*15)+5
+        h = int(random.random()*15)+5
+        floorArea = 0
+        
+        #fill it
+        for j in range(w):
+            for k in range(h):
+                if self.isWithin(j+x,k+y):
+                    if not self.map[j+x][k+y] == self.floor:
+                        self.map[j+x][k+y] = self.floor
+                        floorArea += 1
+                    
+        #'cut' away rooms until we reach our precentage of floor space
+        while (floorArea/float(self.totalArea)) < self.fillPrecentage:
+            #room init
+            x = int(random.random()*self.width)
+            y = int(random.random()*self.height)
+            w = int(random.random()*15)+5
+            h = int(random.random()*15)+5
+
+            #fill it
+            for j in range(w):
+                for k in range(h):                    
+                    if self.isWithin(j+x,k+y):
+                        if not self.map[j+x][k+y] == self.floor:
+                            self.map[j+x][k+y] = self.floor
+                            floorArea += 1
+                        
+            #expand the room until you make contact with another room
+            #this is so we don't have isloated rooms
+            w -= 1
+            h -= 1
+            connected = False
+            while not connected:
+                #expand the borders
+                w += 2
+                h += 2
+                x -= 1
+                y -= 1
+                
+                #fill in just the new edges looking for
+                #a floor tile that is already down
+                for j in range(w+1):
+                    if self.isWithin(j+x, y):
+                        if self.map[j+x][y] == self.floor:
+                            connected = True
+                        else:
+                            self.map[j+x][y] = self.floor
+                            floorArea += 1
+                            
+                    if self.isWithin(j+x, y+h):
+                        if self.map[j+x][y+h] == self.floor:
+                            connected = True
+                        else:
+                            self.map[j+x][y+h] = self.floor
+                            floorArea += 1
+                            
+                for k in range(1,h):
+                    if self.isWithin(x, k+y):
+                        if self.map[x][k+y] == self.floor:
+                            connected = True
+                        else:
+                            self.map[x][k+y] = self.floor
+                            floorArea += 1
+
+                    if self.isWithin(x+w, k+y):
+                        if self.map[x+w][k+y] == self.floor:                        
+                            connected = True
+                        else:
+                            self.map[x+w][k+y] = self.floor
+                            floorArea += 1
+
+            print (floorArea,float(self.totalArea),floorArea/float(self.totalArea))
+
         for x in range(self.width):
             self.map[x][0] = self.wall 
             self.map[x][self.height-1] = self.wall
             
-            for y in range(self.height):
-                self.map[0][y] = self.wall
-                self.map[self.width-1][y] = self.wall
+        for y in range(self.height):
+            self.map[0][y] = self.wall
+            self.map[self.width-1][y] = self.wall
 
-        for i in range(self.width*self.height/2):
-            self.map[int(random.random()*self.width)][int(random.random()*self.height)] = self.wall
-
+        
+    #return if in index range
+    def isWithin(self, x, y):
+        if x > self.width-1 or x < 0 or y > self.height-1 or y < 0:
+            return 0
+        return 1
+    
     #return if the location is 'walkable'
     def isWalkable(self, x, y):
-        if x > self.width-1 or x < 0 or y > self.height-1 or y < 0:
+        if not self.isWithin(x,y):
             return 0
 
         if self.map[x][y] == self.floor:
             return 1
         return 0
+
