@@ -21,13 +21,15 @@ class mapgen_class:
     #print the map out in a 2d style
     #TODO this is very slow, but only here for debugging
     #until we get an observer up, try to find a better way for the observer
-    def printGrid(self, player):
-        self.map[player.x][player.y] = 2
+    def printGrid(self, playerlist):
+        for player in playerlist:
+            self.map[player.x][player.y] = 2
 
         for i in self.map:
             print i
-        
-        self.map[player.x][player.y] = 0
+
+        for player in playerlist:
+            self.map[player.x][player.y] = 0
 
     #create a matrix of the local map
     def localGrid(self, player, radius):
