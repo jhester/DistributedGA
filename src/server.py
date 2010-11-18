@@ -29,7 +29,9 @@ class player_class:
 class MyTCPHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         global map
-        global player
+
+        #create a new player for this connection
+        player = player_class(2,2,map)
 
         while 1:
             #send local map info
@@ -42,9 +44,13 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             map.printGrid(player)        
             
 if __name__ == "__main__":
+    #make sure we didn't forget any commandline arguments
+    if len(sys.argv) < 2:
+        print "ERROR: Usage python server.py <port>"
+        sys.exit()
+    
     #initlize
     map = mapgen_class(40,40)
-    player = player_class(2,2,map)
 
     HOST = ''
     PORT = int(sys.argv[1])

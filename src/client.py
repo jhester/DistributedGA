@@ -15,12 +15,15 @@ host = sys.argv[1]
 port = int(sys.argv[2])
 
 #try and connect to our server
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((host,port))
-print "Connected on "+str(host)+":"+str(port)
+try:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((host,port))
+    print "Connected on "+str(host)+":"+str(port)
+except:
+    print "ERROR: Try to connect to server FAILED"
 
 #main loop
-s.settimeout(2)
+s.settimeout(10)
 while 1:
     data = s.recv(4048).strip()
     data = pickle.loads(data)
