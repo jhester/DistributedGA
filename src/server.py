@@ -3,7 +3,7 @@ import threading
 import pickle
 import sys
 import os
-import Queue
+import time
 
 from mapgen import mapgen_class
 import constant
@@ -32,18 +32,36 @@ class player_class:
 
 #a class to handle all connections coming into this server
 class genericConnection_class(threading.Thread):
-    def __init__(self, conn, dataqueue):
+    def __init__(self, conn):
         threading.Thread.__init__(self)
         self.conn = conn
-        self.dataqueue = dataqueue
         print "genericConnection_class created"
 
     def run(self):
         #we are expecting this conn to send identification (player/observer)
         self.data = int(self.conn.recv(1024))
-        self.dataqueue.put((conn, self.data))
-        print "genericConnection_class data added to queue"
-    
+        self.handleClient(conn, self.data)
+
+    #function to handle creating a client thread
+    def handleClient(self, conn, data):
+        print "handleClient data recieved = "+str(data)
+        
+        #handle player clients
+        if data == constant.constant_class.clientcode:
+            print "GenericConnection starting player"
+            connthread = playerConnectionHandler(len(playerthreadlist), conn)
+            connthread.start()
+            playerthreadlist.append(connthread)
+            
+            #handle observer clients
+        elif data == constant.constant_class.observercode:
+            print "GenericConnection starting observer"
+            (observerConnectionHandler(conn, playerthreadlist)).start()
+
+            #unknown clients
+        else:
+            print "ERROR: Recieved unknown code from client '"+str(data)+"'"
+                                                                                                    
 class playerConnectionHandler(threading.Thread):
     #start with thread with a unique id and the connection for the client
     def __init__(self, id, conn):
@@ -53,22 +71,54 @@ class playerConnectionHandler(threading.Thread):
         print "playerConnectionHandler created id="+str(id)
         
     def run(self):
-        print "["+str(self.id)+"] Connection thread started"
+        global map
+        print "playerConnectionHandler ["+str(self.id)+"] started"
 
         #create a new player for this connection
-        player = player_class(2,2,map)
+        self.player = player_class(2,2,map)
 
         while 1:
             #send local map info
-            self.conn.send(pickle.dumps(map.localGrid(player, 5)))
+            self.conn.send(pickle.dumps(map.localGrid(self.player, 5)))
 
             #we should be reciving a direction
             self.data = int(self.conn.recv(1024))
-            player.moveByDirection(self.data)
+            self.player.moveByDirection(self.data)
             #print "["+str(self.id)+"] Player ("+str(player.x)+","+str(player.y)+")"
             #os.system('clear')
-            #map.printGrid(player)        
-            
+            #map.printGrid(player)
+
+    #getter for id
+    def getId(self):
+        return self.id
+
+    #getter for player positions (should this be done by the thread??)
+    def getPlayerPos(self):
+        return (self.player.x, self.player.y)
+
+class observerConnectionHandler(threading.Thread):
+    #start with thread with a unique id and the connection for the client
+    def __init__(self, conn, playerlist):
+        threading.Thread.__init__(self)
+        self.conn = conn
+        self.playerlist = playerlist
+        print "observerConnectionHandler created"
+        
+    def run(self):
+        global map
+        print "observerConnectionHandler started"
+
+        #send the map
+        print "Pickled map size =" +str(len(pickle.dumps(map.map)))
+        self.conn.send(pickle.dumps(map.map))
+        
+        while 1:
+            time.sleep(0.5)
+            for thread in self.playerlist:
+                #send player id/positions
+                data = pickle.dumps((thread.getId(), thread.getPlayerPos()))
+                print "Pickled player data = " + str(len(data))
+                self.conn.send(data)
             
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
@@ -79,7 +129,6 @@ if __name__ == "__main__":
     #initlize
     map = mapgen_class(40,40)
     playerthreadlist = []
-    connDataQueue = Queue.Queue(10) #Queue is self locking (safe for threads)
 
     HOST = ''
     PORT = int(sys.argv[1])
@@ -91,21 +140,8 @@ if __name__ == "__main__":
     #create new player connection threads for any new connections
     while 1:
         conn, addr = s.accept()
-        (genericConnection_class(conn, connDataQueue)).start()
+        (genericConnection_class(conn)).start()
 
-        while not connDataQueue.empty():
-            conn, data = connDataQueue.get()
-            print "Data found in connDataQueue = "+str((conn, data))
-            
-            if data == constant.constant_class.clientcode:                
-                connthread = playerConnectionHandler(len(playerthreadlist), conn)
-                connthread.start()
-                playerthreadlist.append(connthread)
-            elif data == constant.constant_class.observercode:
-                print "Observercode"
-            else:
-                print "ERROR: Recieved unknown code from client '"+str(data)+"'"
-        
     s.close()
     
                 
