@@ -1,4 +1,5 @@
-import SocketServer
+import socket
+import threading
 import pickle
 import sys
 import os
@@ -26,22 +27,33 @@ class player_class:
             self.x = nextposx
             self.y = nextposy
         
-class MyTCPHandler(SocketServer.BaseRequestHandler):
-    def handle(self):
-        global map
+class playerConnectionHandler(threading.Thread):
+    #start with thread with a unique id and the connection for the client
+    def __init__(self, id, conn):
+        threading.Thread.__init__(self)
+        self.id = id
+        self.conn = conn
+        print "playerConnectionHandler created id="+str(id)
+        
+    def run(self):
+        #global map
+
+        print "New conn started"
 
         #create a new player for this connection
         player = player_class(2,2,map)
 
         while 1:
             #send local map info
-            self.request.send(pickle.dumps(map.localGrid(player, 5)))
+            self.conn.send(pickle.dumps(map.localGrid(player, 5)))
 
             #we should be reciving a direction
-            self.data = int(self.request.recv(1024))
+            self.data = int(self.conn.recv(1024))
             player.moveByDirection(self.data)
-            os.system('clear')
-            map.printGrid(player)        
+            #print "["+str(self.id)+"] Player ("+str(player.x)+","+str(player.y)+")"
+            #os.system('clear')
+            #map.printGrid(player)        
+            
             
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
@@ -51,11 +63,22 @@ if __name__ == "__main__":
     
     #initlize
     map = mapgen_class(40,40)
+    playerthreadlist = []
 
     HOST = ''
     PORT = int(sys.argv[1])
-    server = SocketServer.TCPServer((HOST, PORT), MyTCPHandler)
-    
-    server.serve_forever()
+    s=socket.socket()
+    s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+    s.bind((HOST,PORT))
+    s.listen(5)
+
+    #create new player connection threads for any new connections
+    while 1:
+        conn, addr = s.accept()
+        connthread = playerConnectionHandler(len(playerthreadlist), conn)
+        connthread.start()
+        playerthreadlist.append(connthread)        
+        
+    s.close()
     
                 
