@@ -71,7 +71,7 @@ class mapgen_class:
                 localmap[x].append(self.map[gridx+x][gridy+y])
         return localmap
         
-    #add floor to the map
+    #add floor to the map VERY UGLY FIX ME
     def fillGrid(self):
         #create an initial room
         x = int(random.random()*self.width)
@@ -147,8 +147,6 @@ class mapgen_class:
                         else:
                             self.map[x+w][k+y] = self.floor
                             floorArea += 1
-
-            print (floorArea,float(self.totalArea),floorArea/float(self.totalArea))
 
         for x in range(self.width):
             self.map[x][0] = self.wall 
