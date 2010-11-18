@@ -5,7 +5,7 @@ import socket
 import sys
 import os
 import pickle
-from constant import const_class
+from constant import constant_class
 import time
 
 #don't be hatin
@@ -20,8 +20,10 @@ port = int(sys.argv[2])
 #try and connect to our server
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((host,port))
-s.send(str(const_class.observercode))
 print "Observer Connected on "+str(host)+":"+str(port)
+
+#send observer code to server
+s.send(str(constant_class.observercode))
 
 #main loop
 s.settimeout(2)
