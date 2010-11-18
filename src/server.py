@@ -61,7 +61,7 @@ class genericConnection_class(threading.Thread):
             #unknown clients
         else:
             print "ERROR: Recieved unknown code from client '"+str(data)+"'"
-                                                                                                    
+
 class playerConnectionHandler(threading.Thread):
     #start with thread with a unique id and the connection for the client
     def __init__(self, id, conn):
@@ -84,9 +84,6 @@ class playerConnectionHandler(threading.Thread):
             #we should be reciving a direction
             self.data = int(self.conn.recv(1024))
             self.player.moveByDirection(self.data)
-            #print "["+str(self.id)+"] Player ("+str(player.x)+","+str(player.y)+")"
-            #os.system('clear')
-            #map.printGrid(player)
 
     #getter for id
     def getId(self):
@@ -109,7 +106,6 @@ class observerConnectionHandler(threading.Thread):
         print "observerConnectionHandler started"
 
         #send the map
-        print "Pickled map size =" +str(len(pickle.dumps(map.map)))
         self.conn.send(pickle.dumps(map.map))
         
         while 1:
