@@ -1,4 +1,5 @@
 import sys
+import random
 
 class mapgen_class:
     floor = 0
@@ -22,14 +23,24 @@ class mapgen_class:
     #TODO this is very slow, but only here for debugging
     #until we get an observer up, try to find a better way for the observer
     def printGrid(self, playerlist):
-        for player in playerlist:
-            self.map[player.x][player.y] = 2
+        for (x, y) in playerlist:
+            print "Player at:" + str((x,y))
+            self.map[x][y] = 2
 
         for i in self.map:
-            print i
+            line = ""
+            for j in i:
+                if j == 0:
+                    line += "\033[30m" #black
+                elif j == 2:
+                    line += "\033[31m" #red
+                    
+                line += " " + str(j)
+                line += "\033[0m" #white
+            print line
 
-        for player in playerlist:
-            self.map[player.x][player.y] = 0
+        for (x, y) in playerlist:
+            self.map[x][y] = 0
 
     #create a matrix of the local map
     def localGrid(self, player, radius):
@@ -66,6 +77,9 @@ class mapgen_class:
                 self.map[0][y] = self.wall
                 self.map[self.width-1][y] = self.wall
 
+        for i in range(self.width*self.height/2):
+            self.map[int(random.random()*self.width)][int(random.random()*self.height)] = self.wall
+
     #return if the location is 'walkable'
     def isWalkable(self, x, y):
         if x > self.width-1 or x < 0 or y > self.height-1 or y < 0:
@@ -74,3 +88,8 @@ class mapgen_class:
         if self.map[x][y] == self.floor:
             return 1
         return 0
+
+
+map = mapgen_class(40,40)
+list = []
+map.printGrid(list)
