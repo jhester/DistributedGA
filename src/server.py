@@ -3,7 +3,10 @@ import threading
 import pickle
 import sys
 import os
+import Queue
+
 from mapgen import mapgen_class
+import constant
 
 #a way to convert from direction to position
 #0-up  1-right 2-down 3-left
@@ -26,7 +29,21 @@ class player_class:
         if self.map.isWalkable(nextposx,nextposy):
             self.x = nextposx
             self.y = nextposy
-        
+
+#a class to handle all connections coming into this server
+class genericConnection_class(threading.Thread):
+    def __init__(self, conn, dataqueue):
+        threading.Thread.__init__(self)
+        self.conn = conn
+        self.dataqueue = dataqueue
+        print "genericConnection_class created"
+
+    def run(self):
+        #we are expecting this conn to send identification (player/observer)
+        self.data = int(self.conn.recv(1024))
+        self.dataqueue.put((conn, self.data))
+        print "genericConnection_class data added to queue"
+    
 class playerConnectionHandler(threading.Thread):
     #start with thread with a unique id and the connection for the client
     def __init__(self, id, conn):
@@ -36,9 +53,7 @@ class playerConnectionHandler(threading.Thread):
         print "playerConnectionHandler created id="+str(id)
         
     def run(self):
-        #global map
-
-        print "New conn started"
+        print "["+str(self.id)+"] Connection thread started"
 
         #create a new player for this connection
         player = player_class(2,2,map)
@@ -64,6 +79,7 @@ if __name__ == "__main__":
     #initlize
     map = mapgen_class(40,40)
     playerthreadlist = []
+    connDataQueue = Queue.Queue(10) #Queue is self locking (safe for threads)
 
     HOST = ''
     PORT = int(sys.argv[1])
@@ -75,9 +91,20 @@ if __name__ == "__main__":
     #create new player connection threads for any new connections
     while 1:
         conn, addr = s.accept()
-        connthread = playerConnectionHandler(len(playerthreadlist), conn)
-        connthread.start()
-        playerthreadlist.append(connthread)        
+        (genericConnection_class(conn, connDataQueue)).start()
+
+        while not connDataQueue.empty():
+            conn, data = connDataQueue.get()
+            print "Data found in connDataQueue = "+str((conn, data))
+            
+            if data == constant.constant_class.clientcode:                
+                connthread = playerConnectionHandler(len(playerthreadlist), conn)
+                connthread.start()
+                playerthreadlist.append(connthread)
+            elif data == constant.constant_class.observercode:
+                print "Observercode"
+            else:
+                print "ERROR: Recieved unknown code from client '"+str(data)+"'"
         
     s.close()
     

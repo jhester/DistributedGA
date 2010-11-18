@@ -5,6 +5,8 @@ import random
 import time
 import pickle
 
+import constant
+
 #don't be hatin
 if not len(sys.argv) == 3:
     print "Usage python client.py <host> <port>"
@@ -21,6 +23,9 @@ try:
     print "Connected on "+str(host)+":"+str(port)
 except:
     print "ERROR: Try to connect to server FAILED"
+
+#send client code
+s.send(str(constant.constant_class.clientcode))
 
 #main loop
 s.settimeout(10)

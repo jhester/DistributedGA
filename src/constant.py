@@ -1,4 +1,4 @@
-class const_class:
+class constant_class:
 	observercode = 1
 	clientcode = 0
 	mapwidth = 40 
