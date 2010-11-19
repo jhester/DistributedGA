@@ -70,8 +70,14 @@ class mapgen_class:
             for y in range(radius*2):
                 localmap[x].append(self.map[gridx+x][gridy+y])
         return localmap
-        
-    #add floor to the map VERY UGLY FIX ME
+
+    #return a col of mapdata as a list
+    def getCol(self, x):
+        if x < width and x >= 0:
+            return self.map[x]
+        return None
+    
+    #add floor to the map TODO VERY UGLY FIX ME
     def fillGrid(self):
         #create an initial room
         x = int(random.random()*self.width)
