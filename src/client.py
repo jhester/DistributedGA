@@ -38,7 +38,16 @@ while 1:
 
     os.system('clear')
 
+    print "---------------------------"
     for i in data:
-        print i
-        
+        line = ""
+        for j in i:
+            if j == 0:
+                line += "\033[30m" #black
+                    
+            line += " " + str(j)
+            line += "\033[0m" #white
+        print line
+    print "---------------------------"
+                                                                   
 s.close()
