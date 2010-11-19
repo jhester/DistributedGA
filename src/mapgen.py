@@ -6,13 +6,13 @@ import os
 class mapgen_class:
     floor = 0
     wall = 1
-    map = []
     fillPrecentage = 0.75
 
     def __init__(self, width, height):
         self.width = width
         self.height = height
         self.totalArea = width*height
+        self.map = []
         self.buildGrid(self.wall)
         self.fillGrid()
         
@@ -22,13 +22,12 @@ class mapgen_class:
             self.map.append([])
             for j in range(self.height):
                 self.map[i].append(tile)
-                                            
+
     #print the map out in a 2d style
     #TODO this is very slow, but only here for debugging
     #until we get an observer up, try to find a better way for the observer
     def printGrid(self, playerlist):
         for (x, y) in playerlist:
-            print "Player at:" + str((x,y))
             self.map[x][y] = 2
 
         for i in self.map:
@@ -77,9 +76,9 @@ class mapgen_class:
             return self.map[x]
         return None
     
-    #add floor to the map TODO VERY UGLY FIX ME
+    #add floor to make rooms TODO CLEAN UGLY
     def fillGrid(self):
-        #create an initial room
+        #create a initial room
         x = int(random.random()*self.width)
         y = int(random.random()*self.height)
         w = int(random.random()*15)+5
@@ -93,7 +92,7 @@ class mapgen_class:
                     if not self.map[j+x][k+y] == self.floor:
                         self.map[j+x][k+y] = self.floor
                         floorArea += 1
-                    
+
         #'cut' away rooms until we reach our precentage of floor space
         while (floorArea/float(self.totalArea)) < self.fillPrecentage:
             #room init
