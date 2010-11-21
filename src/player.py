@@ -1,3 +1,7 @@
+#python library
+import random
+
+#our library
 from mapgen import mapgen_class
 import constant
 
@@ -22,3 +26,28 @@ class player_class:
         if self.map.isWalkable(nextposx,nextposy):
             self.x = nextposx
             self.y = nextposy
+
+#class to manage all players, creation/deletion etc
+class playerManager_class:
+    def __init__(self, map):
+        self.playerlist = []
+        self.map = map
+
+    #creates and returns a new player object
+    #also store this player in this manager
+    def addPlayer(self):
+        #start by finding a walkable position
+        while True:
+            x = random.random()
+            y = random.random()        
+            if self.map.isWalkable(x,y):
+                break
+
+        #create the player at this position
+        newplayer = player_class(x,y, map)
+        self.playerlist.append(newplayer)
+        
+        return newplayer
+
+    def movePlayer(self, player, direction):
+        player.moveByDirection(direction)
