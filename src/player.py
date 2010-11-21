@@ -38,16 +38,20 @@ class playerManager_class:
     def addPlayer(self):
         #start by finding a walkable position
         while True:
-            x = random.random()
-            y = random.random()        
+            x = int(random.random()*self.map.width)
+            y = int(random.random()*self.map.height)        
             if self.map.isWalkable(x,y):
                 break
 
         #create the player at this position
-        newplayer = player_class(x,y, map)
+        newplayer = player_class(x,y, self.map)
         self.playerlist.append(newplayer)
         
         return newplayer
 
-    def movePlayer(self, player, direction):
+    def movePlayerDir(self, player, direction):
         player.moveByDirection(direction)
+
+    #return the map surrounding the player
+    def getLocalGrid(self, player):
+        return self.map.localGrid(player, 5)
