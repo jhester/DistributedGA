@@ -5,8 +5,8 @@ import sys
 import os
 import time
 
-from mapgen import mapgen_class
-from player import player_class
+from mapgen import *
+from player import *
 import constant
 
 #a way to convert from direction to position
@@ -19,7 +19,6 @@ class genericConnection_class(threading.Thread):
     def __init__(self, conn):
         threading.Thread.__init__(self)
         self.conn = conn
-        print "genericConnection_class created"
 
     def run(self):
         #we are expecting this conn to send identification (player/observer)
@@ -28,8 +27,6 @@ class genericConnection_class(threading.Thread):
 
     #function to handle creating a client thread
     def handleClient(self, conn, data):
-        print "handleClient data recieved = "+str(data)
-        
         #handle player clients
         if data == constant.constant_class.clientcode:
             print "GenericConnection starting player"
@@ -52,22 +49,20 @@ class playerConnectionHandler(threading.Thread):
         threading.Thread.__init__(self)
         self.id = id
         self.conn = conn
-        print "playerConnectionHandler created id="+str(id)
         
     def run(self):
-        global map
-        print "playerConnectionHandler ["+str(self.id)+"] started"
-
+        global playerManager
+        
         #create a new player for this connection
-        self.player = player_class(2,2,map)
+        self.player = playerManager.addPlayer()
 
         while 1:
             #send local map info
-            self.conn.send(pickle.dumps(map.localGrid(self.player, 5)))
+            self.conn.send(pickle.dumps(playerManager.getLocalGrid(self.player)))
 
             #we should be reciving a direction
             self.data = int(self.conn.recv(1024))
-            self.player.moveByDirection(self.data)
+            playerManager.movePlayerDir(self.player, self.data)
 
     #getter for id
     def getId(self):
@@ -83,11 +78,9 @@ class observerConnectionHandler(threading.Thread):
         threading.Thread.__init__(self)
         self.conn = conn
         self.playerlist = playerlist
-        print "observerConnectionHandler created"
         
     def run(self):
         global map
-        print "observerConnectionHandler started"
 
         #send the map
         self.conn.send(pickle.dumps(map.map))
@@ -107,6 +100,7 @@ if __name__ == "__main__":
     
     #initlize
     map = mapgen_class(40,40)
+    playerManager = playerManager_class(map)
     playerthreadlist = []
 
     HOST = ''
