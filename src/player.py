@@ -11,19 +11,18 @@ global directionConvert
 directionConvert = [(0,-1),(1,0),(0,1),(-1,0)]
 
 class player_class:
-    def __init__(self, x, y, map):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.map = map
 
     #update the players position based on a direction
-    def moveByDirection(self, direction):
+    def moveByDirection(self, direction, map):
         global direcitonConvert
         nextposx = self.x+directionConvert[direction][0]
         nextposy = self.y+directionConvert[direction][1]
 
         #make sure our new position is reachable        
-        if self.map.isWalkable(nextposx,nextposy):
+        if map.isWalkable(nextposx,nextposy):
             self.x = nextposx
             self.y = nextposy
 
@@ -44,13 +43,13 @@ class playerManager_class:
                 break
 
         #create the player at this position
-        newplayer = player_class(x,y, self.map)
+        newplayer = player_class(x,y)
         self.playerlist.append(newplayer)
         
         return newplayer
 
     def movePlayerDir(self, player, direction):
-        player.moveByDirection(direction)
+        player.moveByDirection(direction, self.map)
 
     #return the map surrounding the player
     def getLocalGrid(self, player):
