@@ -6,29 +6,13 @@ import os
 import time
 
 from mapgen import mapgen_class
+from player import player_class
 import constant
 
 #a way to convert from direction to position
 #0-up  1-right 2-down 3-left
 global directionConvert
 directionConvert = [(0,-1),(1,0),(0,1),(-1,0)]
-
-class player_class:
-    def __init__(self, x, y, map):
-        self.x = x
-        self.y = y
-        self.map = map
-
-    #update the players position based on a direction
-    def moveByDirection(self, direction):
-        global direcitonConvert
-        nextposx = self.x+directionConvert[direction][0]
-        nextposy = self.y+directionConvert[direction][1]
-
-        #make sure our new position is reachable        
-        if self.map.isWalkable(nextposx,nextposy):
-            self.x = nextposx
-            self.y = nextposy
 
 #a class to handle all connections coming into this server
 class genericConnection_class(threading.Thread):
@@ -109,11 +93,10 @@ class observerConnectionHandler(threading.Thread):
         self.conn.send(pickle.dumps(map.map))
         
         while 1:
-            time.sleep(0.5)
+            time.sleep(0.25)
             for thread in self.playerlist:
                 #send player id/positions
                 data = pickle.dumps((thread.getId(), thread.getPlayerPos()))
-                print "Pickled player data = " + str(len(data))
                 self.conn.send(data)
             
 if __name__ == "__main__":
