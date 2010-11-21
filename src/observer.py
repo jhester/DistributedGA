@@ -32,7 +32,6 @@ mapdata = s.recv(8096).strip()
 mapdata = pickle.loads(mapdata)
 map = mapgen_class(40,40)
 map.map = mapdata
-print "Map data recieved"
 
 #init
 players = {}
@@ -42,23 +41,23 @@ s.settimeout(5)
 while 1:
     #recv player id/position
     data = s.recv(2048).strip()
+
     data = pickle.loads(data)
     (id, pos) = data
-
+    
     #add to dictionary (pos is an x/y pair)
     players[id] = pos
-
-    #display
-    time.sleep(0.25)
-    os.system('clear')
 
     #convert dictionary to list
     list = []
     for key in players.keys():
         list.append(players[key])
 
+    #display
+    time.sleep(0.1)
+    os.system('clear')
+
     #display list...
     map.printGrid(list)
-
         
 s.close()
