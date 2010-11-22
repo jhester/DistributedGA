@@ -19,7 +19,7 @@ class genericConnection_class(threading.Thread):
         global playerthreadlist
         
         #we are expecting this conn to send identification (player/observer)
-        self.data = int(self.conn.recv(1024))
+        data = int(self.conn.recv(1024))
 
         #handle player clients
         if data == constant_class.clientcode:
@@ -46,18 +46,18 @@ class playerConnectionHandler(threading.Thread):
         print "Player - " + str(id)
         
     def run(self):
-        global playerManager
+        global playermanager
         
         #create a new player for this connection
-        self.player = playerManager.addPlayer()
+        self.player = playermanager.addPlayer()
 
         while 1:
             #send local map info
-            self.conn.send(pickle.dumps(playerManager.getLocalGrid(self.player)))
+            self.conn.send(pickle.dumps(playermanager.getLocalGrid(self.player)))
 
             #we should be reciving a direction
             self.data = int(self.conn.recv(1024))
-            playerManager.movePlayerDir(self.player, self.data)
+            playermanager.movePlayerDir(self.player, self.data)
 
     #getter for id
     def getId(self):
@@ -69,7 +69,7 @@ class playerConnectionHandler(threading.Thread):
 
 class observerConnectionHandler(threading.Thread):
     #start with thread with a unique id and the connection for the client
-    def __init__(self, conn, playerlist):
+    def __init__(self, conn):
         threading.Thread.__init__(self)
         self.conn = conn
         
@@ -80,11 +80,10 @@ class observerConnectionHandler(threading.Thread):
         self.conn.send(pickle.dumps(map.map))
         
         while 1:
-            time.sleep(0.25)
-            for thread in self.playerlist:
-                #send player id/positions
-                data = pickle.dumps(playermanager.getDictionary())
-                self.conn.send(data)
+            time.sleep(0.1)
+            #send player id/positions
+            data = pickle.dumps(playermanager.getDictionary())
+            self.conn.send(data)
             
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
@@ -94,7 +93,7 @@ if __name__ == "__main__":
     
     #initlize variables
     map = mapgen_class(40,40)
-    playerManager = playerManager_class(map)
+    playermanager = playerManager_class(map)
     playerthreadlist = []
 
     #initlize socket
