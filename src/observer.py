@@ -33,20 +33,12 @@ mapdata = pickle.loads(mapdata)
 map = mapgen_class(40,40)
 map.map = mapdata
 
-#init
-players = {}
-
 #main loop
 s.settimeout(5)
 while 1:
     #recv player id/position
-    data = s.recv(2048).strip()
-
-    data = pickle.loads(data)
-    (id, pos) = data
-    
-    #add to dictionary (pos is an x/y pair)
-    players[id] = pos
+    data = s.recv(4048).strip()
+    players = pickle.loads(data)    
 
     #convert dictionary to list
     list = []
