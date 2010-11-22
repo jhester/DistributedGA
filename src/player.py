@@ -6,9 +6,10 @@ from mapgen import mapgen_class
 from constant import *
 
 class player_class:
-    def __init__(self, x, y):
+    def __init__(self, x, y, id):
         self.x = x
         self.y = y
+        self.id = id
 
     #update the players position based on a direction
     def moveByDirection(self, direction, map):
@@ -25,6 +26,8 @@ class playerManager_class:
     def __init__(self, map):
         self.playerlist = []
         self.map = map
+        #currently we are using p to generate id's for players
+        self.p = 0
 
     #creates and returns a new player object
     #also store this player in this manager
@@ -37,7 +40,8 @@ class playerManager_class:
                 break
 
         #create the player at this position
-        newplayer = player_class(x,y)
+        self.p += 1
+        newplayer = player_class(x,y,self.p)
         self.playerlist.append(newplayer)
         
         return newplayer
