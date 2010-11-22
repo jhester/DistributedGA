@@ -7,12 +7,7 @@ import time
 
 from mapgen import *
 from player import *
-import constant
-
-#a way to convert from direction to position
-#0-up  1-right 2-down 3-left
-global directionConvert
-directionConvert = [(0,-1),(1,0),(0,1),(-1,0)]
+from constant import *
 
 #a class to handle all connections coming into this server
 class genericConnection_class(threading.Thread):
@@ -28,14 +23,14 @@ class genericConnection_class(threading.Thread):
     #function to handle creating a client thread
     def handleClient(self, conn, data):
         #handle player clients
-        if data == constant.constant_class.clientcode:
+        if data == constant_class.clientcode:
             print "GenericConnection starting player"
             connthread = playerConnectionHandler(len(playerthreadlist), conn)
             connthread.start()
             playerthreadlist.append(connthread)
             
             #handle observer clients
-        elif data == constant.constant_class.observercode:
+        elif data == constant_class.observercode:
             print "GenericConnection starting observer"
             (observerConnectionHandler(conn, playerthreadlist)).start()
 
