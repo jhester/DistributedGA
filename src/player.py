@@ -52,3 +52,12 @@ class playerManager_class:
     #return the map surrounding the player
     def getLocalGrid(self, player):
         return self.map.localGrid(player, 5)
+
+    #return a dictionary of player IDs and what has changed
+    def getDictionary(self):
+        #we should only be adding information to this dictionary that has changed
+        dict = {}
+        for player in self.playerlist:
+            dict[player.id] = (player.x, player.y)
+
+        return dict
