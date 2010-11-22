@@ -16,12 +16,11 @@ class genericConnection_class(threading.Thread):
         self.conn = conn
 
     def run(self):
+        global playerthreadlist
+        
         #we are expecting this conn to send identification (player/observer)
         self.data = int(self.conn.recv(1024))
-        self.handleClient(conn, self.data)
 
-    #function to handle creating a client thread
-    def handleClient(self, conn, data):
         #handle player clients
         if data == constant_class.clientcode:
             print "GenericConnection starting player"
@@ -32,7 +31,7 @@ class genericConnection_class(threading.Thread):
             #handle observer clients
         elif data == constant_class.observercode:
             print "GenericConnection starting observer"
-            (observerConnectionHandler(conn, playerthreadlist)).start()
+            (observerConnectionHandler(conn)).start()
 
             #unknown clients
         else:
@@ -44,6 +43,7 @@ class playerConnectionHandler(threading.Thread):
         threading.Thread.__init__(self)
         self.id = id
         self.conn = conn
+        print "Player - " + str(id)
         
     def run(self):
         global playerManager
@@ -72,10 +72,9 @@ class observerConnectionHandler(threading.Thread):
     def __init__(self, conn, playerlist):
         threading.Thread.__init__(self)
         self.conn = conn
-        self.playerlist = playerlist
         
     def run(self):
-        global map
+        global playermanager
 
         #send the map
         self.conn.send(pickle.dumps(map.map))
@@ -84,7 +83,7 @@ class observerConnectionHandler(threading.Thread):
             time.sleep(0.25)
             for thread in self.playerlist:
                 #send player id/positions
-                data = pickle.dumps((thread.getId(), thread.getPlayerPos()))
+                data = pickle.dumps(playermanager.getDictionary())
                 self.conn.send(data)
             
 if __name__ == "__main__":
@@ -93,11 +92,12 @@ if __name__ == "__main__":
         print "ERROR: Usage python server.py <port>"
         sys.exit()
     
-    #initlize
+    #initlize variables
     map = mapgen_class(40,40)
     playerManager = playerManager_class(map)
     playerthreadlist = []
 
+    #initlize socket
     HOST = ''
     PORT = int(sys.argv[1])
     s=socket.socket()
