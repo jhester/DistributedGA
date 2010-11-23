@@ -2,3 +2,5 @@ Josiah Hester, Ashley Anderson, Justin Reid
 
 Distributed Genetic Algorithm
 This is our final project for CPSC 362 at Clemson University Computer Science.
+
+Should you make a mistake or make some edits and want all your code to be reset to the most recent version put on git hub, the command "git reset --hard" will do that.
