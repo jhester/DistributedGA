@@ -9,6 +9,7 @@ import time
 
 from constant import constant_class
 from mapgen import mapgen_class
+from player import playerManager_class
 
 #don't be hatin
 if not len(sys.argv) == 3:
@@ -33,17 +34,24 @@ mapdata = pickle.loads(mapdata)
 map = mapgen_class(40,40)
 map.map = mapdata
 
+#create player manager
+playermanager = playerManager_class(map)
+
 #main loop
 s.settimeout(5)
 while 1:
     #recv player id/position
     data = s.recv(4048).strip()
-    players = pickle.loads(data)    
+    data = pickle.loads(data)    
 
-    #convert dictionary to list
+    #merge sent dictionary with player manager
+    playermanager.mergeDictionary(data)
+    players = playermanager.getDictionary()
+
+    #convert dictionary to position list
     list = []
     for key in players.keys():
-        list.append(players[key])
+        list.append((players[key].x, players[key].y))
 
     #display
     time.sleep(0.1)
