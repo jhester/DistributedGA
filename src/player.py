@@ -24,10 +24,9 @@ class player_class:
 #class to manage all players, creation/deletion etc
 class playerManager_class:
     def __init__(self, map):
-        self.playerlist = []
+        self.playerdict = {}
         self.map = map
-        #currently we are using p to generate id's for players
-        self.p = 0
+        self.prevID = 0
 
     #creates and returns a new player object
     #also store this player in this manager
@@ -40,9 +39,9 @@ class playerManager_class:
                 break
 
         #create the player at this position
-        self.p += 1
-        newplayer = player_class(x,y,self.p)
-        self.playerlist.append(newplayer)
+        self.prevID += 1
+        newplayer = player_class(x,y,self.prevID)
+        self.playerdict[self.prevID] = newplayer
         
         return newplayer
 
@@ -55,9 +54,11 @@ class playerManager_class:
 
     #return a dictionary of player IDs and what has changed
     def getDictionary(self):
-        #we should only be adding information to this dictionary that has changed
-        dict = {}
-        for player in self.playerlist:
-            dict[player.id] = (player.x, player.y)
+        #we should be building a dictionary of player IDs that
+        #have changed ONLY (much smaller)
+        return self.playerdict
 
-        return dict
+    def mergeDictionary(self, dict):
+        for (id, player) in dict.items():
+            self.playerdict[id] = player
+            
