@@ -4,8 +4,8 @@
 import socket
 import sys
 import os
-import pickle
 import time
+import pickle
 
 from constant import constant_class
 from mapgen import mapgen_class
@@ -42,13 +42,10 @@ s.settimeout(5)
 while 1:
     #recv player id/position
     data = s.recv(4048).strip()
-    data = pickle.loads(data)    
-
-    #merge sent dictionary with player manager
-    playermanager.mergeDictionary(data)
-    players = playermanager.getDictionary()
+    playermanager.loadSmall(data)
 
     #convert dictionary to position list
+    players = playermanager.getDictionary()
     list = []
     for key in players.keys():
         list.append((players[key].x, players[key].y))
