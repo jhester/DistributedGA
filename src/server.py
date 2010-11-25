@@ -53,7 +53,7 @@ class playerConnectionHandler(threading.Thread):
 
         while 1:
             #send local map info
-            self.conn.send(pickle.dumps(playermanager.getLocalGrid(self.player)))
+            self.conn.sendall(pickle.dumps(playermanager.getLocalGrid(self.player)))
 
             #we should be reciving a direction
             self.data = int(self.conn.recv(1024))
@@ -77,12 +77,12 @@ class observerConnectionHandler(threading.Thread):
         global playermanager
 
         #send the map
-        self.conn.send(pickle.dumps(map.map))
+        self.conn.sendall(pickle.dumps(map.map))
         
         while 1:
             time.sleep(0.1)
             #send player id/positions
-            self.conn.send(playermanager.packSmall())
+            self.conn.sendall(playermanager.packSmall())
             
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
