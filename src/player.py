@@ -1,5 +1,7 @@
 #python library
 import random
+import struct
+import pickle
 
 #our library
 from mapgen import mapgen_class
@@ -20,6 +22,20 @@ class player_class:
         if map.isWalkable(nextposx,nextposy):
             self.x = nextposx
             self.y = nextposy
+
+    #only pack the stuff that could change
+    def packSmall(self):
+        return (self.x, self.y)
+    def loadSmall(self, data):
+        self.x = data[0]
+        self.y = data[1]
+
+    #include AI (everything needed to recreate player)
+    def packAll(self):
+        return (self.x, self.y)
+    def loadAll(self, data):
+        self.x = data[0]
+        self.y = data[1]    
 
 #class to manage all players, creation/deletion etc
 class playerManager_class:
@@ -60,5 +76,23 @@ class playerManager_class:
 
     def mergeDictionary(self, dict):
         for (id, player) in dict.items():
-            self.playerdict[id] = player
+            self.playerdict[id] = player    
+
+    #convert our changed data to a string
+    def packSmall(self):
+        list = []
+        for (id, player) in self.playerdict.items():
+            list.append((id, player.packSmall()))
             
+        return pickle.dumps(list)
+
+    def loadSmall(self, str):
+        list = pickle.loads(str)
+        for (id, data) in list:
+            if self.playerdict.has_key(id):
+                self.playerdict[id].loadSmall(data)
+
+            #new players should not appear unexpectedly
+            else:
+                self.playerdict[id] = player_class(0, 0, id)
+                self.playerdict[id].loadSmall(data)
