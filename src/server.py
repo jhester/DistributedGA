@@ -82,8 +82,7 @@ class observerConnectionHandler(threading.Thread):
         while 1:
             time.sleep(0.1)
             #send player id/positions
-            data = pickle.dumps(playermanager.getDictionary())
-            self.conn.send(data)
+            self.conn.send(playermanager.packSmall())
             
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
