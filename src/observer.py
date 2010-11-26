@@ -27,12 +27,14 @@ print "Observer Connected on "+str(host)+":"+str(port)
 
 #send observer code to server
 s.send(str(constant_class.observercode))
+print "Code sent"
 
 #recv map data
 mapdata = s.recv(8096).strip()
 mapdata = pickle.loads(mapdata)
 map = mapgen_class(40,40)
 map.map = mapdata
+print "Map recieved"
 
 #create player manager
 playermanager = playerManager_class(map)
