@@ -15,7 +15,7 @@ class mapgen_class:
         self.map = []
         self.buildGrid(self.wall)
         self.fillGrid()
-        
+
     #fill the map with 1 tile type
     def buildGrid(self, tile):
         for i in range(self.width):
@@ -75,6 +75,7 @@ class mapgen_class:
         if x < width and x >= 0:
             return self.map[x]
         return None
+
     
     #add floor to make rooms TODO CLEAN UGLY
     def fillGrid(self):
@@ -125,14 +126,14 @@ class mapgen_class:
                 #a floor tile that is already down
                 for j in range(w+1):
                     if self.isWithin(j+x, y):
-                        if self.map[j+x][y] == self.floor:
+                        if self.isFloor(j+x,y) == 1:
                             connected = True
                         else:
                             self.map[j+x][y] = self.floor
                             floorArea += 1
                             
                     if self.isWithin(j+x, y+h):
-                        if self.map[j+x][y+h] == self.floor:
+                        if  self.isFloor(j+x,y+h) == 1:
                             connected = True
                         else:
                             self.map[j+x][y+h] = self.floor
@@ -140,14 +141,14 @@ class mapgen_class:
                             
                 for k in range(1,h):
                     if self.isWithin(x, k+y):
-                        if self.map[x][k+y] == self.floor:
+                        if self.isFloor(x, k+y) == 1:
                             connected = True
                         else:
                             self.map[x][k+y] = self.floor
                             floorArea += 1
 
                     if self.isWithin(x+w, k+y):
-                        if self.map[x+w][k+y] == self.floor:                        
+                        if self.isFloor(x+w,k+y) == 1:                        
                             connected = True
                         else:
                             self.map[x+w][k+y] = self.floor
@@ -167,7 +168,13 @@ class mapgen_class:
         if x > self.width-1 or x < 0 or y > self.height-1 or y < 0:
             return 0
         return 1
-    
+
+    def isFloor(self, x, y):
+        if self.map[x][y] == self.floor:
+           return 1
+        else:
+           return 0
+
     #return if the location is 'walkable'
     def isWalkable(self, x, y):
         if not self.isWithin(x,y):
@@ -176,4 +183,3 @@ class mapgen_class:
         if self.map[x][y] == self.floor:
             return 1
         return 0
-
