@@ -21,6 +21,7 @@ port = int(sys.argv[2])
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host,port))
+    s.settimeout(10)
     print "Connected on "+str(host)+":"+str(port)
 except:
     print "ERROR: Try to connect to server FAILED"
@@ -34,13 +35,12 @@ maplvl = s.recv(64)
 map = mapLoader_class('level'+maplvl+'_layer1.txt')
 
 #main loop
-s.settimeout(10)
 while 1:
     #recieve our position
     (xpos, ypos) = pickle.loads(s.recv(2048))
 
     #wait a little or we will generate too much traffic
-    time.sleep(0.25)
+    time.sleep(0.1)
     s.send(str(int(random.random()*4)))
 
     os.system('clear')
