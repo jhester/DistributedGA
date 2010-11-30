@@ -37,7 +37,15 @@ def load_sliced_sprites(w, h, filename):
     return images
 
 def load_map(map_file):
-    tileData1 = open('../data/maps/'+map_file).readlines()
+    #try to open from the correct directory, if can't try a local version
+    try:
+        tileData1 = open('../data/maps/'+map_file).readlines()
+    except:
+        try:
+            tileData1 = open(map_file).readlines()
+        except:
+            sys.stderr.write("Could not open map_file: " + map_file)
+
     # strip off all the newlines in the strings in tileData1
     tileData1 = [line.rstrip() for line in tileData1]
     tileData1 = [[int(c) for c in s] for s in tileData1]
