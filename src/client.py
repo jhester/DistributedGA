@@ -24,6 +24,7 @@ try:
     print "Connected on "+str(host)+":"+str(port)
 except:
     print "ERROR: Try to connect to server FAILED"
+    sys.exit()
 
 #send client code
 s.send(str(constant.constant_class.clientcode))
