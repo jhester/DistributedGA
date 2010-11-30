@@ -81,7 +81,6 @@ class observerConnectionHandler(threading.Thread):
         global maplvl
 
         #send the map
-        print 'Hey its a map ', str(maplvl)
         self.conn.send(str(maplvl))
         
         while 1:
