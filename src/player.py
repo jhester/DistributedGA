@@ -39,9 +39,11 @@ class player_class:
 
 class blockManager_class:
     def __init__(self, map):
+        self.blockWidth = 5
+
         self.mapsize = map.width
-        self.blockCount = int(map.width/10) + 1
-        self.blockCount = self.blockCount*self.blockCount
+        self.blocksPerSide = int(map.width/self.blockWidth)
+        self.blockCount = self.blocksPerSide*self.blocksPerSide
         self.blocks = []
         self.createBlocks()
 
@@ -49,14 +51,27 @@ class blockManager_class:
         for i in range(self.blockCount):
             self.blocks.append([])
 
-    def updatePlayer(self, player):
-        pass
+    #move the player from one block to another
+    def updatePlayer(self, oldx, oldy, player):
+        oldBlock = self.getBlock(oldx, oldy)
+        newBlock = self.getBlock(player.x, player.y)
+
+        #if the player didn't change blocks we are done
+        if oldBlock == newBlock:
+            return
+
+        #remove from old block, add to new block
+        oldBlock.remove(player)
+        newBlock.append(player)        
+
+    def addPlayer(self, player):
+        self.getBlock(player.x, player.y).append(player)
 
     def getBlock(self, x, y):
-        x = int(x/10)
-        y = int(y/10)
+        x = int(x/self.blockWidth)
+        y = int(y/self.blockWidth)
 
-        b = int(self.mapsize/10)*y + x
+        b = int(self.blocksPerSide)*y + x
         return self.blocks[b]
         
 #class to manage all players, creation/deletion etc
@@ -65,6 +80,7 @@ class playerManager_class:
         self.playerdict = {}
         self.map = map
         self.prevID = 0
+        self.blockManager = blockManager_class(map)
 
     #creates and returns a new player object
     #also store this player in this manager
@@ -80,6 +96,9 @@ class playerManager_class:
         self.prevID += 1
         newplayer = player_class(x,y,self.prevID)
         self.playerdict[self.prevID] = newplayer
+
+        #add to block manager
+        self.blockManager.addPlayer(newplayer)
         
         return newplayer
 
@@ -90,7 +109,15 @@ class playerManager_class:
                 pass
 
     def movePlayerDir(self, player, direction):
+        #record initial position
+        oldx = player.x
+        oldy = player.y
+
+        #move player
         player.moveByDirection(direction, self.map)
+
+        #update blocks
+        self.blockManager.updatePlayer(oldx, oldy, player)
 
     #return a dictionary of player IDs and what has changed
     def getDictionary(self):
