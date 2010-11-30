@@ -39,9 +39,16 @@ print "Map recieved"
 #create player manager
 playermanager = playerManager_class(map)
 
-#main loop
-s.settimeout(5)
-while 1:
+# Setup pygame
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+
+# Map scene
+mapscene = TileMap.TileMap('level1')
+
+# main loop
+running = True
+while running:
     #recv player id/position
     data = s.recv(4048).strip()
     playermanager.loadSmall(data)
@@ -51,12 +58,11 @@ while 1:
     list = []
     for key in players.keys():
         list.append((players[key].x, players[key].y))
-
-    #display
-    time.sleep(0.1)
-    os.system('clear')
-
-    #display list...
-    map.printGrid(list)
         
+    for evt in pygame.event.get():
+        if evt.type == pygame.QUIT:
+            running = False
+        mapscene.update(screen, evt)
+    pygame.display.flip()
+
 s.close()
