@@ -59,7 +59,13 @@ class playerConnectionHandler(threading.Thread):
             self.conn.send(pickle.dumps(self.getPlayerPos()))
 
             #we should be reciving a direction
-            self.data = int(self.conn.recv(1024))            
+            try:
+                self.data = int(self.conn.recv(1024))
+            except:
+                print "Player lost conn - " + str(self.id)
+                playermanager.removePlayer()
+                self.exit()
+                
             playermanager.movePlayerDir(self.player, self.data)
 
     #getter for id
