@@ -11,7 +11,7 @@ import TileMap
 import AnimatedSprite
 import utils
 from constant import constant_class
-from mapgen import mapgen_class
+from maploader import mapLoader_class
 
 #don't be hatin
 if not len(sys.argv) == 3:
@@ -30,29 +30,33 @@ print "Observer Connected on "+str(host)+":"+str(port)
 #send observer code to server
 s.send(str(constant_class.observercode))
 
-# Setup pygame
+#Setup pygame
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
 
-# recv map level
+#recv map level
 maplvl = s.recv(64).strip()[0]
-print maplvl
+map = mapLoader_class('level'+maplvl+'_layer1.txt')
 mapscene = TileMap.TileMap("level"+maplvl)
 
-# add overlord
+#setup playermanager
+playermanager = playerManager_class(map)
+
+#add overlord
 overlord = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'alien.png'), 6,6) 
 mapscene.setOverlord(overlord)
 
-# main loop
+#main loop
 time = 0
 running = True
 while running:
     #recv player id/position
     data = s.recv(4048).strip()
-    players = pickle.loads(data)    
+    playermanager.loadSmall(data)
 
     # Update all the players on the map
     # This will add players if they havent been added
+    players = playermanager.getDictionary()
     for key in players.keys():
         mapscene.updatePlayer(players[key])
       
