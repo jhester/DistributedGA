@@ -3,8 +3,8 @@ requirements= OpSys=="WINNT61" && Arch=="INTEL" && CCIT_LAB==TRUE
 environment=path=C:\winnt\system32
 executable=client.bat
 input=client.py
-transfer_input_files = constant.py, mapgen.py, player.py, observer.py, server.py
-arguments=gecko1.cs.clemson.edu 5556
+transfer_input_files = constant.py, maploader.py, player.py, observer.py, server.py, utils.py, ../data/maps/level1_layer1.txt
+arguments=gecko1.cs.clemson.edu 5555
 
 should_transfer_files=YES
 when_to_transfer_output=ON_EXIT
@@ -12,4 +12,4 @@ when_to_transfer_output=ON_EXIT
 error=condor.err
 notification=never
 
-queue 25
+queue 200
