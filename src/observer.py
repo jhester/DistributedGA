@@ -8,6 +8,8 @@ import pickle
 import time
 import pygame
 import TileMap
+import AnimatedSprite
+import utils
 from constant import constant_class
 from mapgen import mapgen_class
 
@@ -33,8 +35,13 @@ pygame.init()
 screen = pygame.display.set_mode((800, 600))
 
 # recv map level
-maplvl = s.recv(64)
+maplvl = s.recv(64).strip()[0]
+print maplvl
 mapscene = TileMap.TileMap("level"+maplvl)
+
+# add overlord
+overlord = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'alien.png'), 6,6) 
+mapscene.setOverlord(overlord)
 
 # main loop
 time = 0
