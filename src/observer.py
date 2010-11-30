@@ -9,7 +9,7 @@ import time
 import pygame
 import TileMap
 from constant import constant_class
-from mapgen import mapgen_class
+from maploader import mapLoader_class
 
 #don't be hatin
 if not len(sys.argv) == 3:
@@ -28,18 +28,13 @@ print "Observer Connected on "+str(host)+":"+str(port)
 #send observer code to server
 s.send(str(constant_class.observercode))
 
-#recv map data
-mapdata = s.recv(8096).strip()
-mapdata = pickle.loads(mapdata)
-map = mapgen_class(40,40)
-map.map = mapdata
+#recv map level
+maplvl = s.recv(64)
+mapscene = TileMap.TileMap("level"+maplvl)
 
 # Setup pygame
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
-
-# Map scene
-mapscene = TileMap.TileMap('level1')
 
 # main loop
 time = 0
