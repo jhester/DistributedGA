@@ -70,10 +70,11 @@ class TileMap:
         self.overlordOn = truefalse
           
     def updatePlayer(self, player):
-        if self.players[player.id] is not None:
-            self.players[player.id].gotoTile(player.x, player.y)
+        
+        if self.players.has_key(player.id):
+             self.players[player.id].gotoTile(player.x, player.y)
         else:
-            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'zeldamove.png'), player.x,player.y) 
+             self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'zeldamove.png'), player.x,player.y) 
 
         
     def inView(self, tileX, tileY):
