@@ -6,6 +6,7 @@ import time
 import pickle
 
 import constant
+from maploader import mapLoader_class
 
 #don't be hatin
 if not len(sys.argv) == 3:
@@ -27,18 +28,24 @@ except:
 #send client code
 s.send(str(constant.constant_class.clientcode))
 
+#recieve and load map lvl
+maplvl = s.recv(64)
+map = mapLoader_class('level'+maplvl+'_layer1.txt')
+
 #main loop
 s.settimeout(10)
 while 1:
-    data = s.recv(4048).strip()
-    data = pickle.loads(data)
-    
+    #recieve our position
+    (xpos, ypos) = pickle.loads(s.recv(2048))
+
+    #wait a little or we will generate too much traffic
     time.sleep(0.25)
     s.send(str(int(random.random()*4)))
 
     os.system('clear')
 
     print "---------------------------"
+    data = map.localGrid(xpos, ypos, 5)
     for i in data:
         line = ""
         for j in i:
