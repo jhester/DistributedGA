@@ -10,14 +10,13 @@ class mapgen_class:
     fillPrecentage = 0.75
 
     def __init__(self, width, height, maplvl):
+        self.maplvl = maplvl
         self.width = width
         self.height = height
         self.totalArea = width*height
         self.map = []
         self.buildGrid(self.wall)
         self.fillGrid()  
-
-
 
     #fill the map with 1 tile type
     def buildGrid(self, tile):
@@ -41,38 +40,6 @@ class mapgen_class:
                 line += " " + str(j)
                 line += "\033[0m" #white
             print line
-
-    #create a matrix of the local map
-    def localGrid(self, player, radius):
-        #get a center position, ajust for map edges
-        #TODO clean this bit up
-        if self.width < radius*2 or self.height < radius*2:
-            print "ERROR: Attempting to get localgrid 'radius' is greater than map size"
-            sys.exit()            
-        gridx = player.x-radius
-        gridy = player.y-radius
-        if gridx < 0:
-            gridx = 0
-        if gridy < 0:
-            gridy = 0
-        if gridx+radius*2 > self.width-1:
-            gridx = self.width-1-radius*2
-        if gridy+radius*2 > self.height-1:
-            gridy = self.height-1-radius*2
-        
-        localmap = []
-        for x in range(radius*2):
-            localmap.append([])
-            for y in range(radius*2):
-                localmap[x].append(self.map[gridx+x][gridy+y])
-        return localmap
-
-    #return a col of mapdata as a list
-    def getCol(self, x):
-        if x < width and x >= 0:
-            return self.map[x]
-        return None
-
     
     #add floor to make rooms TODO CLEAN UGLY
     def fillGrid(self):
@@ -159,6 +126,10 @@ class mapgen_class:
             self.map[0][y] = self.wall
             self.map[self.width-1][y] = self.wall
 
+    def isFloor(self, x, y):
+        if self.map[x][y] == self.floor:
+            return True
+        return False
         
     #return if in index range
     def isWithin(self, x, y):
@@ -166,23 +137,18 @@ class mapgen_class:
             return 0
         return 1
 
-    def isFloor(self, x, y):
-        if self.map[x][y] == self.floor:
-           return 1
-        else:
-           return 0
+    def save(self):
+        pass
 
-    #return if the location is 'walkable'
-    def isWalkable(self, x, y):
-        if not self.isWithin(x,y):
-            return 0
+width = int(raw_input("Input width: "))
+height = int(raw_input("Input height: "))
+lvl = int(raw_input("Input lvl: "))
 
-        if self.map[x][y] == self.floor:
-            return 1
-        return 0
+yn = 'n'
+while not yn == 'y':
+    map = mapgen_class(width, height, lvl)
+    map.printGrid()
 
-width = 40
-height = 40
-lvl = 2
-map = mapgen_class(width, height, lvl)
-map.printGrid()
+    yn = raw_input("Acceptable? (y/n): ")
+
+map.save()
