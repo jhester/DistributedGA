@@ -37,6 +37,11 @@ class player_class:
         self.x = data[0]
         self.y = data[1]    
 
+class blockManager_class:
+    def __init__(self, map):
+        self.blocks = []
+        self.blocksize = int(map.width/10) + 1
+
 #class to manage all players, creation/deletion etc
 class playerManager_class:
     def __init__(self, map):
@@ -60,6 +65,12 @@ class playerManager_class:
         self.playerdict[self.prevID] = newplayer
         
         return newplayer
+
+    def removePlayer(self, player):
+        for (id, p) in dict.items():
+            if p == player:
+                del self.playerdict[id]
+                pass
 
     def movePlayerDir(self, player, direction):
         player.moveByDirection(direction, self.map)
