@@ -30,3 +30,11 @@ def load_sliced_sprites(w, h, filename):
     for i in xrange(int(master_width/w)):
         images.append(master_image.subsurface((i*w,0,w,h)))
     return images
+
+def load_map(map_file):
+    tileData1 = open('../data/maps/'+map_file).readlines()
+    # strip off all the newlines in the strings in tileData1
+    tileData1 = [line.rstrip() for line in tileData1]
+    tileData1 = [[int(c) for c in s] for s in tileData1]
+    return tileData1
+        

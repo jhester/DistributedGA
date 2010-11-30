@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
-import os, sys, math
+import math
 import pygame
-import Tile
+import utils
 
 from pygame.locals import *
 
@@ -31,14 +31,8 @@ class TileMap:
         #
         # List comprehensions are a fantastic thing. Learn them if you use Python!
         #
-        self.tileData1 = open('../data/maps/'+self.map_file+'_layer1.txt').readlines()
-        # strip off all the newlines in the strings in tileData1
-        self.tileData1 = [line.rstrip() for line in self.tileData1]
-        self.tileData1 = [[int(c) for c in s] for s in self.tileData1]
-        
-        self.tileData2 = open('../data/maps/'+self.map_file+'_layer2.txt').readlines()
-        self.tileData2 = [line.rstrip() for line in self.tileData2]
-        self.tileData2 = [[int(c) for c in s] for s in self.tileData2]
+        self.tileData1 = utils.load_map(self.map_file+'_layer1.txt')
+        self.tileData2 = utils.load_map(self.map_file+'_layer2.txt')
         
         self.vpRenderOffset = (80, 60)
         self.vpStatsOffset = (80, 540)

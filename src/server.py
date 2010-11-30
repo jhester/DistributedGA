@@ -1,8 +1,7 @@
 import socket
 import threading
 import pickle
-import sys
-import os
+import utils
 import time
 
 from mapgen import *
@@ -53,7 +52,7 @@ class playerConnectionHandler(threading.Thread):
 
         while 1:
             #send local map info
-            self.conn.sendall(pickle.dumps(playermanager.getLocalGrid(self.player)))
+            self.conn.send(pickle.dumps(playermanager.getLocalGrid(self.player)))
 
             #we should be reciving a direction
             self.data = int(self.conn.recv(1024))
@@ -77,12 +76,13 @@ class observerConnectionHandler(threading.Thread):
         global playermanager
 
         #send the map
-        self.conn.sendall(pickle.dumps(map.map))
+        self.conn.send(pickle.dumps(map.map))
         
         while 1:
             time.sleep(0.1)
             #send player id/positions
-            self.conn.sendall(playermanager.packSmall())
+            data = pickle.dumps(playermanager.getDictionary())
+            self.conn.send(data)
             
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         sys.exit()
     
     #initlize variables
-    map = mapgen_class(40,40)
+    map = mapgen_class(40,40,'level1_layer1.txt')
     playermanager = playerManager_class(map)
     playerthreadlist = []
 
