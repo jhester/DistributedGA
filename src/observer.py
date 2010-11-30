@@ -28,13 +28,14 @@ print "Observer Connected on "+str(host)+":"+str(port)
 #send observer code to server
 s.send(str(constant_class.observercode))
 
-# recv map level
-maplvl = s.recv(64)
-mapscene = TileMap.TileMap("level"+maplvl)
-
 # Setup pygame
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
+
+# recv map level
+maplvl = s.recv(64).strip()[0]
+print maplvl
+mapscene = TileMap.TileMap("level"+maplvl)
 
 # main loop
 time = 0
