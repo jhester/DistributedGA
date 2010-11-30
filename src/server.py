@@ -42,9 +42,9 @@ class playerConnectionHandler(threading.Thread):
         threading.Thread.__init__(self)
         self.id = id
         self.conn = conn
-        print "Player - " + str(id)
         
     def run(self):
+        print "Player started - " + str(self.id)
         global playermanager
         global maplvl
         
@@ -59,7 +59,7 @@ class playerConnectionHandler(threading.Thread):
             self.conn.send(pickle.dumps(self.getPlayerPos()))
 
             #we should be reciving a direction
-            self.data = int(self.conn.recv(1024))
+            self.data = int(self.conn.recv(1024))            
             playermanager.movePlayerDir(self.player, self.data)
 
     #getter for id
