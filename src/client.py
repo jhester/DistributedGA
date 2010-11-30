@@ -41,21 +41,9 @@ while 1:
 
     #wait a little or we will generate too much traffic
     time.sleep(0.1)
-    s.send(str(int(random.random()*4)))
 
-    os.system('clear')
-
-    print "---------------------------"
     data = map.localGrid(xpos, ypos, 5)
-    for i in data:
-        line = ""
-        for j in i:
-            if j == 0:
-                line += "\033[30m" #black
-                    
-            line += " " + str(j)
-            line += "\033[0m" #white
-        print line
-    print "---------------------------"
+
+    s.send(str(int(random.random()*4)))
                                                                    
 s.close()
