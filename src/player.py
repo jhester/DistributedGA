@@ -39,9 +39,26 @@ class player_class:
 
 class blockManager_class:
     def __init__(self, map):
+        self.mapsize = map.width
+        self.blockCount = int(map.width/10) + 1
+        self.blockCount = self.blockCount*self.blockCount
         self.blocks = []
-        self.blocksize = int(map.width/10) + 1
+        self.createBlocks()
 
+    def createBlocks(self):
+        for i in range(self.blockCount):
+            self.blocks.append([])
+
+    def updatePlayer(self, player):
+        pass
+
+    def getBlock(self, x, y):
+        x = int(x/10)
+        y = int(y/10)
+
+        b = int(self.mapsize/10)*y + x
+        return self.blocks[b]
+        
 #class to manage all players, creation/deletion etc
 class playerManager_class:
     def __init__(self, map):
