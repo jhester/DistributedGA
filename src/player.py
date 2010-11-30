@@ -4,7 +4,7 @@ import struct
 import pickle
 
 #our library
-from mapgen import mapgen_class
+from maploader import mapLoader_class
 from constant import *
 
 class player_class:
@@ -63,10 +63,6 @@ class playerManager_class:
 
     def movePlayerDir(self, player, direction):
         player.moveByDirection(direction, self.map)
-
-    #return the map surrounding the player
-    def getLocalGrid(self, player):
-        return self.map.localGrid(player, 5)
 
     #return a dictionary of player IDs and what has changed
     def getDictionary(self):
