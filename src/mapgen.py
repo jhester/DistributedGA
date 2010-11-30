@@ -2,6 +2,7 @@ import sys
 import random
 import time
 import os
+import utils
 
 class mapgen_class:
     floor = 0
@@ -18,8 +19,8 @@ class mapgen_class:
             self.fillGrid()  
         else:
             self.map = utils.load_map('level1_layer1.txt')
-            self.height = len(map)
-            self.width = len(map[0])
+            self.height = len(self.map)
+            self.width = len(self.map[0])
             self.totalArea = width*height
 
 
