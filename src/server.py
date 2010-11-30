@@ -4,7 +4,7 @@ import pickle
 import utils
 import time
 
-from mapgen import *
+from maploader import *
 from player import *
 from constant import *
 
@@ -46,13 +46,17 @@ class playerConnectionHandler(threading.Thread):
         
     def run(self):
         global playermanager
+        global maplvl
         
         #create a new player for this connection
         self.player = playermanager.addPlayer()
 
+        #send maplvl
+        self.conn.send(str(maplvl))
+
         while 1:
-            #send local map info
-            self.conn.send(pickle.dumps(playermanager.getLocalGrid(self.player)))
+            #send (position)
+            self.conn.send(pickle.dumps(self.getPlayerPos()))
 
             #we should be reciving a direction
             self.data = int(self.conn.recv(1024))
@@ -74,9 +78,10 @@ class observerConnectionHandler(threading.Thread):
         
     def run(self):
         global playermanager
+        global maplvl
 
         #send the map
-        self.conn.send(pickle.dumps(map.map))
+        self.conn.send(str(maplvl))
         
         while 1:
             time.sleep(0.1)
@@ -91,7 +96,8 @@ if __name__ == "__main__":
         sys.exit()
     
     #initlize variables
-    map = mapgen_class(40,40,'level1_layer1.txt')
+    maplvl = 1
+    map = mapLoader_class('level'+str(maplvl)+'_layer1.txt')
     playermanager = playerManager_class(map)
     playerthreadlist = []
 
