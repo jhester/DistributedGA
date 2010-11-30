@@ -33,7 +33,8 @@ pygame.init()
 screen = pygame.display.set_mode((800, 600))
 
 # recv map level
-maplvl = s.recv(64)
+maplvl = s.recv(64).strip()[0]
+print maplvl
 mapscene = TileMap.TileMap("level"+maplvl)
 
 # main loop
