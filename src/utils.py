@@ -1,5 +1,10 @@
-import pygame
 import os
+
+#we have to surround with try statements... pygame is not on condor
+try:
+    import pygame
+except:
+    print "No pygame!!"
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('../data', 'images')
