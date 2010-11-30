@@ -8,13 +8,20 @@ class mapgen_class:
     wall = 1
     fillPrecentage = 0.75
 
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.totalArea = width*height
-        self.map = []
-        self.buildGrid(self.wall)
-        self.fillGrid()
+    def __init__(self, width, height, map_file=''):
+        if map_file == '':
+            self.width = width
+            self.height = height
+            self.totalArea = width*height
+            self.map = []
+            self.buildGrid(self.wall)
+            self.fillGrid()  
+        else:
+            self.map = utils.load_map('level1_layer1.txt')
+            self.height = len(map)
+            self.width = len(map[0])
+            self.totalArea = width*height
+
 
     #fill the map with 1 tile type
     def buildGrid(self, tile):
