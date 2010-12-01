@@ -36,6 +36,8 @@ def load_sliced_sprites(w, h, filename):
         images.append(master_image.subsurface((i*w,0,w,h)))
     return images
 
+
+# Note that the map loaded by this puts its y before x, access it like map[y][x]
 def load_map(map_file):
     #try to open from the correct directory, if can't try a local version
     try:

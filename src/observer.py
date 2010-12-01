@@ -44,7 +44,7 @@ mapscene = TileMap.TileMap("level"+maplvl)
 playermanager = playerManager_class(map)
 
 #add overlord
-overlord = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'alien.png'), 6,6) 
+overlord = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'alien.png'), 6,6, 0, 3, 3, mapscene) 
 mapscene.setOverlord(overlord)
 
 #main loop

@@ -7,7 +7,7 @@ class mapLoader_class:
             print "No map file name supplied with map_class"
             sys.exit()
             
-        self.map = utils.load_map('level1_layer1.lvl')
+        self.map = utils.load_map('level1_col.lvl')
         self.height = len(self.map)-1
         self.width = len(self.map[0])-1
 
@@ -41,7 +41,7 @@ class mapLoader_class:
         
     #return if in index range
     def isWithin(self, x, y):
-        if x > self.width-1 or x < 0 or y > self.height-1 or y < 0:
+        if x > self.width or x < 0 or y > self.height or y < 0:
             return 0
         return 1
 
@@ -50,7 +50,7 @@ class mapLoader_class:
         if not self.isWithin(x,y):
             return 0
 
-        if self.map[x][y] == self.floor:
+        if self.map[y][x] == self.floor:
             return 1
         return 0
 
@@ -59,7 +59,7 @@ class mapLoader_class:
     #until we get an observer up, try to find a better way for the observer
     def printGrid(self, playerlist):
         for (x, y) in playerlist:
-            self.map[x][y] = 2
+            self.map[y][x] = 2
             
         for i in self.map:
             line = ""
@@ -74,5 +74,5 @@ class mapLoader_class:
             print line
 
         for (x, y) in playerlist:
-            self.map[x][y] = 0
+            self.map[y][x] = 0
                             

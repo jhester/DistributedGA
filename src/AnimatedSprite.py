@@ -4,7 +4,7 @@ import math
 
 class AnimatedSprite(pygame.sprite.Sprite):
     
-    def __init__(self, images, tileX, tileY, start_direction = 0, frames_per_direction = 3, fps = 3):
+    def __init__(self, images, tileX, tileY, start_direction = 0, frames_per_direction = 3, fps = 3, map = None):
         pygame.sprite.Sprite.__init__(self)
         self._images = images
         #Animations: 0-up  1-right 2-down 3-left
@@ -30,52 +30,49 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.moving = False
         self.rect = pygame.Rect(tileX*32, tileY*32, 32, 32)
         
+        # Overlord hack
+        self.map = map
+        
         # Set our first image.
         self._frame = self.direction*self.frames_per_direction
         self.image = self._images[self._frame]
 
     def goDirection(self, direction):
-        self.moving = True
-        self.direction = direction
-        self.directionChanged = True
         if direction == self.UP:
-            self.lastTileY = self.tileY
-            self.tileY += -1
+            self.gotoTile(self.tileX, self.tileY-1)
         if direction == self.DOWN:
-            self.lastTileY = self.tileY
-            self.tileY += 1
+            self.gotoTile(self.tileX, self.tileY+1)
         if direction == self.LEFT:
-            self.lastTileX = self.tileX
-            self.tileX += -1
+            self.gotoTile(self.tileX-1, self.tileY)
         if direction == self.RIGHT:
-            self.lastTileX = self.tileX
-            self.tileX += 1
-        
-        # Reset the step
-        self.step = 0
+            self.gotoTile(self.tileX+1, self.tileY)
     
     def gotoTile(self, tileX, tileY):
-        # Figure out what general direction were going
+        # Figure out what general direction were going, even if we cant go there we have to
+        # at least turn
         diffX = tileX - self.tileX
         diffY = tileY - self.tileY
-        if diffY >= diffX:
-            if diffY > 0: self.direction = self.UP
-            else: self.direction = self.DOWN
+        if math.fabs(diffY) >= math.fabs(diffX):
+            if diffY > 0: self.direction = self.DOWN
+            else: self.direction = self.UP
         else:
             if diffX > 0: self.direction = self.RIGHT
             else: self.direction = self.LEFT
-
-        # Set the destination
-        self.moving = True
-        self.directionChanged = True
-        self.lastTileX = self.tileX
-        self.lastTileY = self.tileY
-
-        self.tileX = tileX
-        self.tileY = tileY;
-        
-        # Reset the step
-        self.step = 0
+            
+        # FIgure out if we can move and setup movement
+        if self.map is not None and self.map.isWalkable(tileX, tileY):
+    
+            # Set the destination
+            self.moving = True
+            self.directionChanged = True
+            self.lastTileX = self.tileX
+            self.lastTileY = self.tileY
+    
+            self.tileX = tileX
+            self.tileY = tileY;
+            
+            # Reset the step
+            self.step = 0
         
     def handleKeyUp(self, evt):
         if evt.key == pygame.K_a:

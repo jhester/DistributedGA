@@ -24,6 +24,7 @@ class TileMap:
         # Load tiles
         self.tileData1 = utils.load_map(self.map_file+'_layer1.lvl')
         self.tileData2 = utils.load_map(self.map_file+'_layer2.lvl')
+        self.col_data = utils.load_map(self.map_file+'_col.lvl')
         self.map_size = len(self.tileData1[0])-1
         
         # Load up sprites
@@ -96,7 +97,20 @@ class TileMap:
         if tileX >= startXTile and tileX < startXTile+self.numXTiles and tileY >= startYTile and tileY < startYTile+self.numYTiles:
             return True
         return False
-        
+    
+    def isWithin(self, x, y):
+        if x > self.map_size or x < 0 or y > self.map_size or y < 0:
+            return 0
+        return 1
+    
+    def isWalkable(self, x, y):
+        if not self.isWithin(x,y):
+            return False
+
+        if self.col_data[y][x] == 0:
+            return True
+        return False   
+    
     def update(self, screen, evt):
         if evt.type == pygame.KEYDOWN:
             if evt.key == pygame.K_LEFT:
@@ -148,7 +162,7 @@ class TileMap:
                 self.tileLayer.blit(self.tiles[self.tileData1[y][x]], ((x - startXTile) * self.tileWidth, (y - startYTile) * self.tileHeight))
                 if self.tileData2[y][x] is not 1:
                     self.tileLayer.blit(self.tiles[self.tileData2[y][x]], ((x - startXTile) * self.tileWidth, (y - startYTile) * self.tileHeight))
-    
+ 
         screen.blit(self.tileLayer, self.vpRenderOffset, (self.xvpCoordinate - (startXTile * self.tileWidth), self.yvpCoordinate - (startYTile * self.tileHeight)) + self.vpDimensions)
         
         # Now render the bottom part of the sprite layer which is impassable
@@ -168,7 +182,7 @@ class TileMap:
             if self.inView(player.tileX, player.tileY):
                 player.update(self.time, screen, self.xvpCoordinate, self.yvpCoordinate, self.vpRenderOffset, self.tileWidth, self.vpDimensions)
        
-        # Update overlord if applicable
+        # Update overlord if applicable, make sure of collisions
         if self.overlord is not None and self.overlordOn is True:
             if self.inView(self.overlord.tileX, self.overlord.tileY):
                 self.overlord.update(self.time, screen, self.xvpCoordinate, self.yvpCoordinate, self.vpRenderOffset, self.tileWidth, self.vpDimensions)
