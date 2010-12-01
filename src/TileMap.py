@@ -16,7 +16,7 @@ class TileMap:
     def __init__(self, map_file):
         self.tiles = [pygame.image.load('../data/images/tile%d.png' % n).convert_alpha() for n in range(6)]
         self.map_sprites = [pygame.image.load('../data/images/sprite%d.png' % n).convert_alpha() for n in range(4)]
-        self.map_sprites_rd = [53, 0, 94, 94]
+        self.map_sprites_rd = [53, 0, 128, 128]
         self.map_sprites_list = []
         self.tileWidth, self.tileHeight = self.tiles[0].get_size()
         self.map_file = map_file

@@ -4,7 +4,7 @@ import math
 
 class AnimatedSprite(pygame.sprite.Sprite):
     
-    def __init__(self, images, tileX, tileY, start_direction = 0, frames_per_direction = 3, fps = 3, map = None):
+    def __init__(self, images, tileX, tileY, start_direction = 0, frames_per_direction = 3, fps = 4, map = None):
         pygame.sprite.Sprite.__init__(self)
         self._images = images
         #Animations: 0-up  1-right 2-down 3-left
@@ -58,13 +58,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
         else:
             if diffX > 0: self.direction = self.RIGHT
             else: self.direction = self.LEFT
+        self.directionChanged = True
             
         # FIgure out if we can move and setup movement
         if self.map is not None and self.map.isWalkable(tileX, tileY):
     
             # Set the destination
             self.moving = True
-            self.directionChanged = True
             self.lastTileX = self.tileX
             self.lastTileY = self.tileY
     
@@ -94,6 +94,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         if self.directionChanged is True:
             self._frame = self.direction*self.frames_per_direction
             self.directionChanged = False
+            self.image = self._images[self._frame]
             
         if self.moving is True and t - self._last_update > self._delay:
             self._frame += 1
