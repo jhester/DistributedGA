@@ -1,4 +1,4 @@
-import os
+import os, sys
 
 #we have to surround with try statements... pygame is not on condor
 try:

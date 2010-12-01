@@ -24,7 +24,7 @@ class TileMap:
         # Load tiles
         self.tileData1 = utils.load_map(self.map_file+'_layer1.lvl')
         self.tileData2 = utils.load_map(self.map_file+'_layer2.lvl')
-        self.map_size = len(self.tileData1[0])
+        self.map_size = len(self.tileData1[0])-1
         
         # Load up sprites
         self.spriteData = utils.load_map(self.map_file+'_sprites.lvl')
