@@ -1,7 +1,7 @@
 #python library
 import random
-import struct
 import pickle
+import threading
 
 #our library
 from maploader import mapLoader_class
@@ -103,6 +103,14 @@ class playerManager_class:
         self.map = map
         self.prevID = 0
         self.blockManager = blockManager_class(map)
+        self.running = threading.Event()
+        self.running.set() #initially true for now
+
+    def pause(self):
+        self.running.clear()
+
+    def resume(self):
+        self.running.set()
 
     #creates and returns a new player object
     #also store this player in this manager
@@ -133,6 +141,9 @@ class playerManager_class:
                 pass
 
     def movePlayerDir(self, player, direction):
+        #don't allow movement while paused
+        self.running.wait()
+
         #record initial position
         oldx = player.x
         oldy = player.y
@@ -142,6 +153,19 @@ class playerManager_class:
 
         #update blocks
         self.blockManager.updatePlayer(oldx, oldy, player)
+
+    #do damage to other players on the same tile
+    def attack(self, p1):
+        if p1.health <= 0:
+            return
+        
+        locallist = self.blockManager.getBlock(p1.x, p1.y)
+        for p2 in locallist:
+            if not p2 == p1 and p2.health > 0:
+                if p2.x == p1.x and p2.y == p1.y:
+                    p2.health -= 1
+                    if p2.health <= 0:
+                        print "Player ("+str(p2.id)+") died!"
 
     #return a dictionary of player IDs and what has changed
     def getDictionary(self):
@@ -174,7 +198,6 @@ class playerManager_class:
 
     def packLocal(self, player):
         blocks = self.blockManager.getSurroundingBlocks(player.x, player.y)
-        #blocks[0].remove(player) #remove this player from its own local player list
         locallist = []
 
         #convert the list of lists of players into
@@ -183,6 +206,7 @@ class playerManager_class:
         #so we don't need to include IDs        
         for i in blocks:
             for j in i:
-                locallist.append(j.packSmall())
+                if not j == player:
+                    locallist.append(j.packSmall())
 
         return pickle.dumps(locallist)
