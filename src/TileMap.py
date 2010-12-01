@@ -14,8 +14,6 @@ BLOCK_SIZE = 32
 class TileMap:
     
     def __init__(self, map_file):
-        # this sets up a list (dynamic array) where tiles[N] corresponds to TiledScrolling_Tile{N}.jpg
-        
         self.tiles = [pygame.image.load('../data/images/tile%d.png' % n).convert_alpha() for n in range(6)]
         self.tileWidth, self.tileHeight = self.tiles[0].get_size()
         self.map_file = map_file
@@ -59,7 +57,14 @@ class TileMap:
         # The overlord, invincible user man
         self.overlord = None
         self.overlordOn = False
-       
+        
+        # Add the mini-map
+        self.map_size = len(self.tileData1[0])
+        self.minimap = utils.load_image('minimap.png')
+        self.box = utils.load_image('box.png')
+        self.ratio = self.minimap.get_height()/self.map_size
+        print self.ratio, self.map_size, self.box.get_height()
+
     def addPlayer(self, player):
             self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'zeldamove.png'), player.x,player.y) 
     
@@ -70,11 +75,10 @@ class TileMap:
         self.overlordOn = truefalse
           
     def updatePlayer(self, player):
-        
         if self.players.has_key(player.id):
-             self.players[player.id].gotoTile(player.x, player.y)
+            self.players[player.id].gotoTile(player.x, player.y)
         else:
-             self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'zeldamove.png'), player.x,player.y) 
+            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'zeldamove.png'), player.x,player.y) 
 
         
     def inView(self, tileX, tileY):
@@ -151,3 +155,11 @@ class TileMap:
         if self.overlord is not None and self.overlordOn is True:
             if self.inView(self.overlord.tileX, self.overlord.tileY):
                 self.overlord.update(self.time, screen, self.xvpCoordinate, self.yvpCoordinate, self.vpRenderOffset, self.tileWidth, self.vpDimensions)
+
+        # Now update the mini-map
+        screen.blit(self.minimap,  (self.vpRenderOffset[0]+426,self.vpRenderOffset[1]+264))
+        for player in list:
+            screen.blit(self.box, (self.vpRenderOffset[0]+426+player.tileX*self.ratio+4, self.vpRenderOffset[1]+264+player.tileY*self.ratio+4))
+        pygame.draw.rect(screen, (0,255,255), (self.vpRenderOffset[0]+430+startXTile*self.ratio,self.vpRenderOffset[1]+268+startYTile*self.ratio,self.numXTiles*self.ratio,self.numYTiles*self.ratio), 1) 
+        
+        #screen.blit(surf, (self.vpRenderOffset[0]+426+player.tileX*ratio, self.vpRenderOffset[1]+264+player.tileY*ratio))
