@@ -60,6 +60,9 @@ class blockManager_class:
     def addPlayer(self, player):
         self.getBlock(player.x, player.y).append(player)
 
+    def removePlayer(self, player):
+        self.getBlock(player.x, player.y).remove(player)
+
     def getBlock(self, x, y):
         x = int(x/self.blockWidth)
         y = int(y/self.blockWidth)
@@ -120,7 +123,9 @@ class playerManager_class:
         return newplayer
 
     def removePlayer(self, player):
-        for (id, p) in dict.items():
+        self.blockManager.removePlayer(player)
+        
+        for (id, p) in self.playerdict.items():
             if p == player:
                 del self.playerdict[id]
                 pass
@@ -167,6 +172,7 @@ class playerManager_class:
 
     def packLocal(self, player):
         blocks = self.blockManager.getSurroundingBlocks(player.x, player.y)
+        blocks[0].remove(player) #remove this player from its own local player list
         locallist = []
 
         #convert the list of lists of players into
@@ -178,6 +184,3 @@ class playerManager_class:
                 locallist.append(j.packSmall())
 
         return pickle.dumps(locallist)
-
-    def loadLocal(self, str):
-        return pickle.loads(str)
