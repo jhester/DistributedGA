@@ -55,16 +55,17 @@ class playerConnectionHandler(threading.Thread):
         self.conn.send(str(maplvl))
 
         while 1:
-            #send (position)
-            self.conn.send(pickle.dumps(self.getPlayerPos()))
+            #send (position,localplayers)
+            print len(pickle.dumps((self.getPlayerPos(),playermanager.packLocal(self.player))))
+            self.conn.send(pickle.dumps((self.getPlayerPos(),playermanager.packLocal(self.player))))
 
             #we should be reciving a direction
             try:
                 self.data = int(self.conn.recv(1024))
             except:
                 print "Player lost conn - " + str(self.id)
-                playermanager.removePlayer()
-                self.exit()
+                playermanager.removePlayer(self.player)
+                return
                 
             playermanager.movePlayerDir(self.player, self.data)
 
