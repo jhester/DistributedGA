@@ -7,6 +7,7 @@ import pickle
 
 import constant
 from maploader import mapLoader_class
+from player import *
 
 #don't be hatin
 if not len(sys.argv) == 3:
@@ -36,14 +37,12 @@ map = mapLoader_class('level'+maplvl+'_layer1.txt')
 
 #main loop
 while 1:
-    #recieve our position
-    (xpos, ypos) = pickle.loads(s.recv(2048))
+    #recieve position and local players
+    ((xpos, ypos), localplayers) = pickle.loads(s.recv(4096))
+    localplayers = pickle.loads(localplayers)
 
     #wait a little or we will generate too much traffic
     time.sleep(0.1)
-
-    data = map.localGrid(xpos, ypos, 5)
-
     s.send(str(int(random.random()*4)))
                                                                    
 s.close()
