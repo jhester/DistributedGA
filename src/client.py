@@ -10,6 +10,9 @@ import constant
 from maploader import mapLoader_class
 from player import *
 
+def randBool():
+    return random.choice((1, 0))
+
 def getDist(x1,y1,x2,y2):
     x = x1-x2
     y = y1-y2
@@ -45,7 +48,7 @@ map = mapLoader_class('level'+maplvl+'_layer1.txt')
 #main loop
 while 1:
     #recieve position and local players
-    ((xpos, ypos), localplayers) = pickle.loads(s.recv(4096))
+    ((xpos, ypos, health), localplayers) = pickle.loads(s.recv(4096))
     localplayers = pickle.loads(localplayers)
 
     #find the closest player, move toward it
@@ -59,19 +62,31 @@ while 1:
             closestX = x
             closestY = y
 
-    if x > xpos:
-        dir = 1
-    elif x < xpos:
-        dir = 3
-    elif y > ypos:
-        dir = 2
-    elif y < ypos:
-        dir = 0
+    if randBool():
+        if closestX > xpos:
+            dir = 1
+        elif closestX < xpos:
+            dir = 3
+        elif closestY > ypos:
+            dir = 2
+        elif closestY < ypos:
+            dir = 0
+        else:
+            dir = 4
     else:
-        dir = 4
-
+        if closestY > ypos:
+            dir = 2
+        elif closestY < ypos:
+            dir = 0
+        elif closestX > xpos:
+            dir = 1
+        elif closestX < xpos:
+            dir = 3
+        else:
+            dir = 4
+                                                                                        
     #wait a little or we will generate too much traffic
-    time.sleep(0.1)
+    time.sleep(random.random())
     s.send(str(dir))
                                                                    
 s.close()
