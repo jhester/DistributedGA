@@ -92,7 +92,14 @@ class TileMap:
           
     def updatePlayer(self, player):
         if self.players.has_key(player.id):
-            self.players[player.id].gotoTile(player.x, player.y)
+            # Check to see if player is attacking
+            if player.attacking:
+                self.players[player.id].attack()
+            # Check to see if were dying 
+            elif player.health <= 0:
+                self.players[player.id].die()
+            else:
+                self.players[player.id].gotoTile(player.x, player.y)
         else:
             self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zeldamove.png'), player.x,player.y) 
 
@@ -206,6 +213,6 @@ class TileMap:
             screen.blit(self.box2, (self.vpRenderOffset[0]+580+self.overlord.tileX*self.ratio+4, self.vpRenderOffset[1]+385+self.overlord.tileY*self.ratio+4))
         for player in list:
             screen.blit(self.box, (self.vpRenderOffset[0]+580+player.tileX*self.ratio+4, self.vpRenderOffset[1]+385+player.tileY*self.ratio+4))
-        pygame.draw.rect(screen, (0,255,255), (self.vpRenderOffset[0]+580+startXTile*self.ratio+4,self.vpRenderOffset[1]+385+startYTile*self.ratio,self.numXTiles*self.ratio,self.numYTiles*self.ratio), 1) 
+        pygame.draw.rect(screen, (0,255,255), (self.vpRenderOffset[0]+580+startXTile*self.ratio+4,self.vpRenderOffset[1]+385+startYTile*self.ratio+4,self.numXTiles*self.ratio,self.numYTiles*self.ratio-4), 1) 
         
         #screen.blit(surf, (self.vpRenderOffset[0]+426+player.tileX*ratio, self.vpRenderOffset[1]+264+player.tileY*ratio))

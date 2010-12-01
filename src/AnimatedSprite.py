@@ -30,6 +30,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.moving = False
         self.rect = pygame.Rect(tileX*32, tileY*32, 32, 32)
         
+        # Status booleans
+        self.dead = False
+        self.attacking = False
+        
         # Overlord hack
         self.map = map
         
@@ -48,31 +52,33 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.gotoTile(self.tileX+1, self.tileY)
     
     def gotoTile(self, tileX, tileY):
-        # Figure out what general direction were going, even if we cant go there we have to
-        # at least turn
-        diffX = tileX - self.tileX
-        diffY = tileY - self.tileY
-        if math.fabs(diffY) >= math.fabs(diffX):
-            if diffY > 0: self.direction = self.DOWN
-            else: self.direction = self.UP
-        else:
-            if diffX > 0: self.direction = self.RIGHT
-            else: self.direction = self.LEFT
-        self.directionChanged = True
-            
-        # FIgure out if we can move and setup movement
-        if self.map is not None and self.map.isWalkable(tileX, tileY):
-    
-            # Set the destination
-            self.moving = True
-            self.lastTileX = self.tileX
-            self.lastTileY = self.tileY
-    
-            self.tileX = tileX
-            self.tileY = tileY;
-            
-            # Reset the step
-            self.step = 0
+        # Only move if were not already moving.
+        if not self.moving:
+            # Figure out what general direction were going, even if we cant go there we have to
+            # at least turn
+            diffX = tileX - self.tileX
+            diffY = tileY - self.tileY
+            if math.fabs(diffY) >= math.fabs(diffX):
+                if diffY > 0: self.direction = self.DOWN
+                else: self.direction = self.UP
+            else:
+                if diffX > 0: self.direction = self.RIGHT
+                else: self.direction = self.LEFT
+            self.directionChanged = True
+                
+            # FIgure out if we can move and setup movement
+            if self.map is not None and self.map.isWalkable(tileX, tileY):
+        
+                # Set the destination
+                self.moving = True
+                self.lastTileX = self.tileX
+                self.lastTileY = self.tileY
+        
+                self.tileX = tileX
+                self.tileY = tileY;
+                
+                # Reset the step
+                self.step = 0
         
     def handleKeyUp(self, evt):
         if evt.key == pygame.K_a:
@@ -84,7 +90,15 @@ class AnimatedSprite(pygame.sprite.Sprite):
         elif evt.key == pygame.K_s:
             self.goDirection(self.DOWN)
         
+    def attack(self):
+        # Do some attacking?
+        self.attacking = True
         
+    def die(self):
+        # die somehow?
+        if not self.dead:
+            self.dead = True
+            
     def update(self, t, screen, xvpCoordinate, yvpCoordinate, screenOffset, tileHeight, vpDimensions):
         # Note that this doesn't work if it's been more that self._delay
         # time between calls to update(); we only update the image once

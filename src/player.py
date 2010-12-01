@@ -12,7 +12,8 @@ class player_class:
         self.x = x
         self.y = y
         self.health = 100
-        self.id = id        
+        self.id = id
+        self.attacking = False
         
     #update the players position based on a direction
     def moveByDirection(self, direction, map):

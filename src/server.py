@@ -54,7 +54,7 @@ class playerConnectionHandler(threading.Thread):
 
         #send maplvl
         self.conn.send(str(maplvl))
-
+        
         while 1:
             #TEMP TEMP TEMP
             #end connection if player is dead
@@ -76,6 +76,7 @@ class playerConnectionHandler(threading.Thread):
                 return
                 
             playermanager.movePlayerDir(self.player, self.data)
+            
 
     #getter for id
     def getId(self):
@@ -131,7 +132,7 @@ class gameMaster(threading.Thread):
         #main loop where we pause movement and do damage
         while 1:
             #prevent players from moving while we do damage
-            time.sleep(0.25)
+            time.sleep(0.5)
             playermanager.pause()
 
             #tell all threads to 'attack'
