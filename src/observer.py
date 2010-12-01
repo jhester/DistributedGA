@@ -57,9 +57,9 @@ while running:
 
     # Update all the players on the map
     # This will add players if they havent been added
-    players = playermanager.getDictionary()
-    for key in players.keys():
-        mapscene.updatePlayer(players[key])
+    players = playermanager.getPlayerList()
+    for player in players:
+        mapscene.updatePlayer(player)
       
     # Handle map rendering and updating with movement    
     for evt in pygame.event.get():
