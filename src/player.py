@@ -11,6 +11,7 @@ class player_class:
     def __init__(self, x, y, id):
         self.x = x
         self.y = y
+        self.health = 100
         self.id = id
 
     #update the players position based on a direction
@@ -25,10 +26,11 @@ class player_class:
 
     #only pack the stuff that could change
     def packSmall(self):
-        return (self.x, self.y)
+        return (self.x, self.y, self.health)
     def loadSmall(self, data):
         self.x = data[0]
         self.y = data[1]
+        self.health = data[2]
 
 class blockManager_class:
     def __init__(self, map):
@@ -172,7 +174,7 @@ class playerManager_class:
 
     def packLocal(self, player):
         blocks = self.blockManager.getSurroundingBlocks(player.x, player.y)
-        blocks[0].remove(player) #remove this player from its own local player list
+        #blocks[0].remove(player) #remove this player from its own local player list
         locallist = []
 
         #convert the list of lists of players into
