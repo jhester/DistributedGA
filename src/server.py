@@ -42,6 +42,7 @@ class playerConnectionHandler(threading.Thread):
         threading.Thread.__init__(self)
         self.id = id
         self.conn = conn
+        self.player = None
         
     def run(self):
         print "Player started - " + str(self.id)
@@ -55,14 +56,22 @@ class playerConnectionHandler(threading.Thread):
         self.conn.send(str(maplvl))
 
         while 1:
-            #send (position,localplayers)
-            self.conn.send(pickle.dumps((self.getPlayerPos(),playermanager.packLocal(self.player))))
+            #TEMP TEMP TEMP
+            #end connection if player is dead
+            if self.player.health <= 0:
+                print "TERMINATING self.id="+str(self.id)+" player.id="+str(self.player.id)
+                playermanager.removePlayer(self.player)
+                self.conn.close()
+                return
+            
+            #send (data,localplayers)
+            self.conn.send(pickle.dumps((self.player.packSmall(),playermanager.packLocal(self.player))))
 
             #we should be reciving a direction
             try:
                 self.data = int(self.conn.recv(1024))
             except:
-                print "Player lost conn - " + str(self.id)
+                print "PlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)
                 playermanager.removePlayer(self.player)
                 return
                 
@@ -74,7 +83,15 @@ class playerConnectionHandler(threading.Thread):
 
     #getter for player positions (should this be done by the thread??)
     def getPlayerPos(self):
-        return (self.player.x, self.player.y)
+        return (self.player.x, self.player.y, self.player.health)
+
+    #attack all players on the same tile
+    def doDamage(self):
+        if self.player == None:
+            return
+        
+        global playermanager
+        playermanager.attack(self.player)
 
 class observerConnectionHandler(threading.Thread):
     #start with thread with a unique id and the connection for the client
@@ -98,12 +115,29 @@ class observerConnectionHandler(threading.Thread):
                 print "Observer disconnected"
                 return
 
+#responcible for the game as a whole
+#spawning new players, determining game end,
+#doing damage
 class gameMaster(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)        
 
     def run(self):
-        pass
+        global playermanager
+        global playerthreadlist
+
+        #main loop where we pause movement and do damage
+        while 1:
+            #prevent players from moving while we do damage
+            time.sleep(1)
+            playermanager.pause()
+
+            #tell all threads to 'attack'
+            for thread in playerthreadlist:
+                thread.doDamage()
+
+            #allow movement again
+            playermanager.resume()
 
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
@@ -116,6 +150,10 @@ if __name__ == "__main__":
     map = mapLoader_class('level'+str(maplvl)+'_layer1.txt')
     playermanager = playerManager_class(map)
     playerthreadlist = []
+
+    #startup the game master
+    gamemaster = gameMaster()
+    gamemaster.start()
 
     #initlize socket
     HOST = ''
