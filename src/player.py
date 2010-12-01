@@ -12,8 +12,8 @@ class player_class:
         self.x = x
         self.y = y
         self.health = 100
-        self.id = id
-
+        self.id = id        
+        
     #update the players position based on a direction
     def moveByDirection(self, direction, map):
         nextposx = self.x+constant_class.directionconvert[direction][0]
@@ -99,7 +99,7 @@ class blockManager_class:
 #class to manage all players, creation/deletion etc
 class playerManager_class:
     def __init__(self, map):
-        self.playerdict = {}
+        self.playerlist = []
         self.map = map
         self.prevID = 0
         self.blockManager = blockManager_class(map)
@@ -125,7 +125,7 @@ class playerManager_class:
         #create the player at this position
         self.prevID += 1
         newplayer = player_class(x,y,self.prevID)
-        self.playerdict[self.prevID] = newplayer
+        self.playerlist.append(newplayer)
 
         #add to block manager
         self.blockManager.addPlayer(newplayer)
@@ -134,11 +134,7 @@ class playerManager_class:
 
     def removePlayer(self, player):
         self.blockManager.removePlayer(player)
-        
-        for (id, p) in self.playerdict.items():
-            if p == player:
-                del self.playerdict[id]
-                pass
+        self.playerlist.remove(player)
 
     def movePlayerDir(self, player, direction):
         #don't allow movement while paused
@@ -167,34 +163,39 @@ class playerManager_class:
                     if p2.health <= 0:
                         print "Player ("+str(p2.id)+") died!"
 
-    #return a dictionary of player IDs and what has changed
-    def getDictionary(self):
-        #we should be building a dictionary of player IDs that
-        #have changed ONLY (much smaller)
-        return self.playerdict
+    #return a list of player IDs and what has changed
+    def getPlayerList(self):
+        return self.playerlist
 
-    def mergeDictionary(self, dict):
-        for (id, player) in dict.items():
-            self.playerdict[id] = player    
+    def mergePlayerList(self, list):
+        for newPlayer in list:
+            for oldPlayer in self.playerlist:
+                if newPlayer.id == oldPlayer.id:
+                    oldPlayer = newPlayer
+                    break
 
     #convert our changed data to a string
     def packSmall(self):
         list = []
-        for (id, player) in self.playerdict.items():
-            list.append((id, player.packSmall()))
+        for player in self.playerlist:
+            list.append((player.id, player.packSmall()))
             
         return pickle.dumps(list)
 
     def loadSmall(self, str):
         list = pickle.loads(str)
         for (id, data) in list:
-            if self.playerdict.has_key(id):
-                self.playerdict[id].loadSmall(data)
+            found = False
+            for player in self.playerlist:
+                if player.id == id:
+                    player.loadSmall(data)
+                    found = True
 
-            #new players should not appear unexpectedly
-            else:
-                self.playerdict[id] = player_class(0, 0, id)
-                self.playerdict[id].loadSmall(data)
+            #we should be sending info on player spawns and deaths...
+            if not found:
+                player = player_class(0, 0, id)
+                player.loadSmall(data)
+                self.playerlist.append(player)
 
     def packLocal(self, player):
         blocks = self.blockManager.getSurroundingBlocks(player.x, player.y)
