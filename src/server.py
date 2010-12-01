@@ -56,7 +56,6 @@ class playerConnectionHandler(threading.Thread):
 
         while 1:
             #send (position,localplayers)
-            print len(pickle.dumps((self.getPlayerPos(),playermanager.packLocal(self.player))))
             self.conn.send(pickle.dumps((self.getPlayerPos(),playermanager.packLocal(self.player))))
 
             #we should be reciving a direction
@@ -93,8 +92,19 @@ class observerConnectionHandler(threading.Thread):
         while 1:
             time.sleep(0.1)
             #send player id/positions
-            self.conn.send(playermanager.packSmall())
-            
+            try:
+                self.conn.send(playermanager.packSmall())
+            except:
+                print "Observer disconnected"
+                return
+
+class gameMaster(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)        
+
+    def run(self):
+        pass
+
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
     if len(sys.argv) < 2:
