@@ -18,7 +18,7 @@ class mapgen_class:
             self.buildGrid(self.wall)
             self.fillGrid()  
         else:
-            self.map = utils.load_map('level1_layer1.txt')
+            self.map = utils.load_map('level1_layer1.lvl')
             self.height = len(self.map)
             self.width = len(self.map[0])
             self.totalArea = width*height

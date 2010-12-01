@@ -103,7 +103,7 @@ if __name__ == "__main__":
     
     #initlize variables
     maplvl = 1
-    map = mapLoader_class('level'+str(maplvl)+'_layer1.txt')
+    map = mapLoader_class('level'+str(maplvl)+'_layer1.lvl')
     playermanager = playerManager_class(map)
     playerthreadlist = []
 

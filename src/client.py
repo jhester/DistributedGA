@@ -33,7 +33,7 @@ s.send(str(constant.constant_class.clientcode))
 
 #recieve and load map lvl
 maplvl = s.recv(64)
-map = mapLoader_class('level'+maplvl+'_layer1.txt')
+map = mapLoader_class('level'+maplvl+'_layer1.lvl')
 
 #main loop
 while 1:

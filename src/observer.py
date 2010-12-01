@@ -37,7 +37,7 @@ screen = pygame.display.set_mode((800, 600))
 
 #recv map level
 maplvl = s.recv(64).strip()[0]
-map = mapLoader_class('level'+maplvl+'_layer1.txt')
+map = mapLoader_class('level'+maplvl+'_layer1.lvl')
 mapscene = TileMap.TileMap("level"+maplvl)
 
 #setup playermanager
