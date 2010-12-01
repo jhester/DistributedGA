@@ -30,13 +30,6 @@ class player_class:
         self.x = data[0]
         self.y = data[1]
 
-    #include AI (everything needed to recreate player)
-    def packAll(self):
-        return (self.x, self.y)
-    def loadAll(self, data):
-        self.x = data[0]
-        self.y = data[1]    
-
 class blockManager_class:
     def __init__(self, map):
         self.blockWidth = 5
@@ -73,6 +66,30 @@ class blockManager_class:
 
         b = int(self.blocksPerSide)*y + x
         return self.blocks[b]
+
+    def addBlock(self, blockX, blockY, list):
+        if blockX >= self.blocksPerSide or blockX < 0 or blockY >= self.blocksPerSide or blockY < 0:
+            return
+
+        list.append(self.blocks[int(self.blocksPerSide)*blockY + blockX])
+    
+    def getSurroundingBlocks(self, x, y):
+        x = int(x/self.blockWidth)
+        y = int(y/self.blockWidth)
+
+        #add blocks to our list if they exist
+        list = []
+        self.addBlock(x,y,list)
+        self.addBlock(x+1,y,list)
+        self.addBlock(x,y+1,list)
+        self.addBlock(x-1,y,list)
+        self.addBlock(x,y-1,list)
+        self.addBlock(x+1,y+1,list)
+        self.addBlock(x-1,y-1,list)
+        self.addBlock(x+1,y-1,list)
+        self.addBlock(x-1,y+1,list)
+
+        return list
         
 #class to manage all players, creation/deletion etc
 class playerManager_class:
@@ -147,3 +164,20 @@ class playerManager_class:
             else:
                 self.playerdict[id] = player_class(0, 0, id)
                 self.playerdict[id].loadSmall(data)
+
+    def packLocal(self, player):
+        blocks = self.blockManager.getSurroundingBlocks(player.x, player.y)
+        locallist = []
+
+        #convert the list of lists of players into
+        #a list of player data (pos, health)
+        #the clients don't need to keep track of the player after it leaves view
+        #so we don't need to include IDs        
+        for i in blocks:
+            for j in i:
+                locallist.append(j.packSmall())
+
+        return pickle.dumps(locallist)
+
+    def loadLocal(self, str):
+        return pickle.loads(str)
