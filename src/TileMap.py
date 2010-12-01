@@ -15,27 +15,37 @@ class TileMap:
     
     def __init__(self, map_file):
         self.tiles = [pygame.image.load('../data/images/tile%d.png' % n).convert_alpha() for n in range(6)]
+        self.map_sprites = [pygame.image.load('../data/images/sprite%d.png' % n).convert_alpha() for n in range(4)]
+        self.map_sprites_rd = [53, 0, 94, 94]
+        self.map_sprites_list = []
         self.tileWidth, self.tileHeight = self.tiles[0].get_size()
         self.map_file = map_file
         
         # Load tiles
-        self.tileData1 = utils.load_map(self.map_file+'_layer1.txt')
-        self.tileData2 = utils.load_map(self.map_file+'_layer2.txt')
+        self.tileData1 = utils.load_map(self.map_file+'_layer1.lvl')
+        self.tileData2 = utils.load_map(self.map_file+'_layer2.lvl')
+        self.map_size = len(self.tileData1[0])
         
+        # Load up sprites
+        self.spriteData = utils.load_map(self.map_file+'_sprites.lvl')
+        for x in range(self.map_size):
+            for y in range(self.map_size):
+                if self.spriteData[y][x] is not 1: self.map_sprites_list.append((x,y,self.spriteData[y][x]))
+
         # Setup the offset and viewport coordinates and dimensions
-        self.vpRenderOffset = (80, 60)
+        self.vpRenderOffset = (0, 0)
         self.vpStatsOffset = (80, 540)
          
         self.xvpCoordinate = 0
         self.yvpCoordinate = 0
-        self.vpDimensions = (640, 480)
+        self.vpDimensions = (800, 600)
         
         # Set up the boundaries
         self.minHorzScrollBounds = 0
-        self.maxHorzScrollBounds = len(self.tileData1[0]) * self.tileWidth - 640 - self.tileWidth
+        self.maxHorzScrollBounds = len(self.tileData1[0]) * self.tileWidth - self.vpDimensions[0] - self.tileWidth
         
         self.minVertScrollBounds = 0
-        self.maxVertScrollBounds = len(self.tileData1) * self.tileHeight - 480 - self.tileHeight
+        self.maxVertScrollBounds = len(self.tileData1) * self.tileHeight - self.vpDimensions[1] - self.tileHeight
         
         # Velocity set and reset during update loops
         self.xadvanceVelocity = 0
@@ -59,11 +69,10 @@ class TileMap:
         self.overlordOn = False
         
         # Add the mini-map
-        self.map_size = len(self.tileData1[0])
         self.minimap = utils.load_image('minimap.png')
         self.box = utils.load_image('box.png')
+        self.box2 = utils.load_image('box2.png')
         self.ratio = self.minimap.get_height()/self.map_size
-        print self.ratio, self.map_size, self.box.get_height()
 
     def addPlayer(self, player):
             self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'zeldamove.png'), player.x,player.y) 
@@ -129,7 +138,7 @@ class TileMap:
                 self.yvpCoordinate = self.maxVertScrollBounds
                 
      
-        # render
+        # Render the tiles
         screen.fill((0, 0, 0))
         startXTile = math.floor(float(self.xvpCoordinate) / self.tileWidth)
         startYTile = math.floor(float(self.yvpCoordinate) / self.tileHeight)
@@ -142,7 +151,15 @@ class TileMap:
     
         screen.blit(self.tileLayer, self.vpRenderOffset, (self.xvpCoordinate - (startXTile * self.tileWidth), self.yvpCoordinate - (startYTile * self.tileHeight)) + self.vpDimensions)
         
-        # Update the sprites
+        # Now render the bottom part of the sprite layer which is impassable
+        xdiff = self.xvpCoordinate-startXTile*self.tileHeight
+        ydiff = self.yvpCoordinate-startYTile*self.tileHeight
+        for item in self.map_sprites_list:
+            screen.blit(self.map_sprites[item[2]]
+                        .subsurface((0,self.map_sprites_rd[item[2]], self.map_sprites[item[2]].get_width(), self.map_sprites[item[2]].get_height()-self.map_sprites_rd[item[2]])), 
+                        (self.vpRenderOffset[0]-xdiff+(item[0]-startXTile)*32,self.vpRenderOffset[1]-ydiff+(item[1]-startYTile)*32))
+        
+        # Update the player sprites
         self.time += 1000.0 / 30
         list = []
         for key in self.players.keys():
@@ -155,11 +172,20 @@ class TileMap:
         if self.overlord is not None and self.overlordOn is True:
             if self.inView(self.overlord.tileX, self.overlord.tileY):
                 self.overlord.update(self.time, screen, self.xvpCoordinate, self.yvpCoordinate, self.vpRenderOffset, self.tileWidth, self.vpDimensions)
+                
+        # Render the passable part of the sprites
+        for item in self.map_sprites_list:
+            screen.blit(self.map_sprites[item[2]]
+                        .subsurface((0,0, self.map_sprites[item[2]].get_width(), self.map_sprites_rd[item[2]])), 
+                        (self.vpRenderOffset[0]-xdiff+(item[0]-startXTile)*32,self.vpRenderOffset[1]-ydiff+(item[1]-startYTile)*32-self.map_sprites_rd[item[2]]))
 
         # Now update the mini-map
-        screen.blit(self.minimap,  (self.vpRenderOffset[0]+426,self.vpRenderOffset[1]+264))
+        screen.blit(self.minimap,  (self.vpRenderOffset[0]+580,self.vpRenderOffset[1]+385))
+        # Blit overlord
+        if self.overlordOn is True:
+            screen.blit(self.box2, (self.vpRenderOffset[0]+580+self.overlord.tileX*self.ratio+4, self.vpRenderOffset[1]+385+self.overlord.tileY*self.ratio+4))
         for player in list:
-            screen.blit(self.box, (self.vpRenderOffset[0]+426+player.tileX*self.ratio+4, self.vpRenderOffset[1]+264+player.tileY*self.ratio+4))
-        pygame.draw.rect(screen, (0,255,255), (self.vpRenderOffset[0]+430+startXTile*self.ratio,self.vpRenderOffset[1]+268+startYTile*self.ratio,self.numXTiles*self.ratio,self.numYTiles*self.ratio), 1) 
+            screen.blit(self.box, (self.vpRenderOffset[0]+580+player.tileX*self.ratio+4, self.vpRenderOffset[1]+385+player.tileY*self.ratio+4))
+        pygame.draw.rect(screen, (0,255,255), (self.vpRenderOffset[0]+580+startXTile*self.ratio+4,self.vpRenderOffset[1]+385+startYTile*self.ratio,self.numXTiles*self.ratio,self.numYTiles*self.ratio), 1) 
         
         #screen.blit(surf, (self.vpRenderOffset[0]+426+player.tileX*ratio, self.vpRenderOffset[1]+264+player.tileY*ratio))
