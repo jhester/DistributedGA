@@ -37,14 +37,14 @@ screen = pygame.display.set_mode((800, 600))
 
 #recv map level
 maplvl = s.recv(64).strip()[0]
-map = mapLoader_class('level'+maplvl+'_layer1.lvl')
+map = mapLoader_class('level'+maplvl)
 mapscene = TileMap.TileMap("level"+maplvl)
 
 #setup playermanager
 playermanager = playerManager_class(map)
 
 #add overlord
-overlord = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'alien.png'), 6,6, 0, 3, 3, mapscene) 
+overlord = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/alien.png'), 6,6, 0, 3, 3, mapscene) 
 mapscene.setOverlord(overlord)
 
 #main loop

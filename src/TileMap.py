@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import math
+import os, glob, math
 import pygame
 import utils
 import AnimatedSprite
@@ -14,16 +14,22 @@ BLOCK_SIZE = 32
 class TileMap:
     
     def __init__(self, map_file):
-        self.tiles = [pygame.image.load('../data/images/tile%d.png' % n).convert_alpha() for n in range(6)]
-        self.map_sprites = [pygame.image.load('../data/images/sprite%d.png' % n).convert_alpha() for n in range(4)]
+        #self.tiles = [pygame.image.load('../data/images/tiles/tile%d.png' % n).convert_alpha() for n in range(6)]
+        # Load the tiles
+        self.tiles = {}
+        for infile in glob.glob( os.path.join('../data/images/tiles', '*.*') ):
+            self.tiles[infile[len(infile)-5]] = pygame.image.load(infile).convert_alpha()   
+        
+        # Load the sprites
+        self.map_sprites = [pygame.image.load('../data/images/sprites/sprite%d.png' % n).convert_alpha() for n in range(4)]
         self.map_sprites_rd = [53, 0, 128, 128]
         self.map_sprites_list = []
-        self.tileWidth, self.tileHeight = self.tiles[0].get_size()
+        self.tileWidth, self.tileHeight = self.tiles['0'].get_size()
         self.map_file = map_file
         
         # Load tiles
-        self.tileData1 = utils.load_map(self.map_file+'_layer1.lvl')
-        self.tileData2 = utils.load_map(self.map_file+'_layer2.lvl')
+        self.tileData1 = utils.load_char_map(self.map_file+'_layer1.lvl')
+        self.tileData2 = utils.load_char_map(self.map_file+'_layer2.lvl')
         self.col_data = utils.load_map(self.map_file+'_col.lvl')
         self.map_size = len(self.tileData1[0])-1
         
@@ -76,7 +82,7 @@ class TileMap:
         self.ratio = self.minimap.get_height()/self.map_size
 
     def addPlayer(self, player):
-            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'zeldamove.png'), player.x,player.y) 
+            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zeldamove.png'), player.x,player.y) 
     
     def setOverlord(self, sprite):
         self.overlord = sprite
@@ -88,7 +94,7 @@ class TileMap:
         if self.players.has_key(player.id):
             self.players[player.id].gotoTile(player.x, player.y)
         else:
-            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'zeldamove.png'), player.x,player.y) 
+            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zeldamove.png'), player.x,player.y) 
 
         
     def inView(self, tileX, tileY):
@@ -160,7 +166,7 @@ class TileMap:
         for x in range(startXTile, startXTile + self.numXTiles):
             for y in range(startYTile, startYTile + self.numYTiles):
                 self.tileLayer.blit(self.tiles[self.tileData1[y][x]], ((x - startXTile) * self.tileWidth, (y - startYTile) * self.tileHeight))
-                if self.tileData2[y][x] is not 1:
+                if self.tileData2[y][x] is not '1':
                     self.tileLayer.blit(self.tiles[self.tileData2[y][x]], ((x - startXTile) * self.tileWidth, (y - startYTile) * self.tileHeight))
  
         screen.blit(self.tileLayer, self.vpRenderOffset, (self.xvpCoordinate - (startXTile * self.tileWidth), self.yvpCoordinate - (startYTile * self.tileHeight)) + self.vpDimensions)

@@ -52,4 +52,20 @@ def load_map(map_file):
     tileData1 = [line.rstrip() for line in tileData1]
     tileData1 = [[int(c) for c in s] for s in tileData1]
     return tileData1
+
+# Note that the map loaded by this puts its y before x, access it like map[y][x]
+def load_char_map(map_file):
+    #try to open from the correct directory, if can't try a local version
+    try:
+        tileData1 = open('../data/maps/'+map_file).readlines()
+    except:
+        try:
+            tileData1 = open(map_file).readlines()
+        except:
+            sys.stderr.write("Could not open map_file: " + map_file)
+
+    # strip off all the newlines in the strings in tileData1
+    tileData1 = [line.rstrip() for line in tileData1]
+    tileData1 = [[c for c in s] for s in tileData1]
+    return tileData1
         
