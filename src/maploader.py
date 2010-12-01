@@ -2,10 +2,6 @@ import sys
 import utils
 
 class mapLoader_class:
-    floor = 0
-    wall = 1
-    fillPrecentage = 0.75
-
     def __init__(self, map_file=''):
         if map_file == '':
             print "No map file name supplied with map_class"
@@ -15,13 +11,16 @@ class mapLoader_class:
         self.height = len(self.map)
         self.width = len(self.map[0])
 
+        self.floor = 0
+
     #create a matrix of the local map
     def localGrid(self, xpos, ypos, radius):
         #get a center position, ajust for map edges
         #TODO clean this bit up
         if self.width < radius*2 or self.height < radius*2:
             print "ERROR: Attempting to get localgrid 'radius' is greater than map size"
-            sys.exit()            
+            sys.exit()
+            
         gridx = xpos-radius
         gridy = ypos-radius
         if gridx < 0:
