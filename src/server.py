@@ -121,6 +121,8 @@ class observerConnectionHandler(threading.Thread):
 class gameMaster(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)        
+        self.minPlayers = 15 #number of players required to start round
+        self.endCount = 5 #number of players alive to end round
 
     def run(self):
         global playermanager
@@ -129,7 +131,7 @@ class gameMaster(threading.Thread):
         #main loop where we pause movement and do damage
         while 1:
             #prevent players from moving while we do damage
-            time.sleep(1)
+            time.sleep(0.25)
             playermanager.pause()
 
             #tell all threads to 'attack'
