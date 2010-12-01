@@ -4,10 +4,17 @@ import os
 import random
 import time
 import pickle
+import math
 
 import constant
 from maploader import mapLoader_class
 from player import *
+
+def getDist(x1,y1,x2,y2):
+    x = x1-x2
+    y = y1-y2
+    d = math.sqrt(x*x + y*y)
+    return d
 
 #don't be hatin
 if not len(sys.argv) == 3:
@@ -41,8 +48,30 @@ while 1:
     ((xpos, ypos), localplayers) = pickle.loads(s.recv(4096))
     localplayers = pickle.loads(localplayers)
 
+    #find the closest player, move toward it
+    closestX = 0
+    closestY = 0
+    closestDist = 9999
+    for (x,y,h) in localplayers:
+        thisDist = getDist(xpos,ypos,x,y)        
+        if closestDist > thisDist:            
+            closestDist = thisDist
+            closestX = x
+            closestY = y
+
+    if x > xpos:
+        dir = 1
+    elif x < xpos:
+        dir = 3
+    elif y > ypos:
+        dir = 2
+    elif y < ypos:
+        dir = 0
+    else:
+        dir = 4
+
     #wait a little or we will generate too much traffic
     time.sleep(0.1)
-    s.send(str(int(random.random()*4)))
+    s.send(str(dir))
                                                                    
 s.close()
