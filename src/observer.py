@@ -12,6 +12,7 @@ import AnimatedSprite
 import utils
 from constant import constant_class
 from maploader import mapLoader_class
+from player import *
 
 #don't be hatin
 if not len(sys.argv) == 3:

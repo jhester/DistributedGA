@@ -106,4 +106,4 @@ class AnimatedSprite(pygame.sprite.Sprite):
         #screen.blit(self.image, screenOffset, (xvpCoordinate - (startXTile * tileHeight), yvpCoordinate - (startYTile * tileHeight)) + vpDimensions)
         screen.blit(self.image, (screenOffset[0]-xdiff+(self.tileX-startXTile)*32,screenOffset[1]-ydiff+(self.tileY-startYTile)*32))
         #screen.blit(self.image, self.rect.topleft)
-        #print startXTile, startYTile, xdiff, ydiff, self.tileX, self.tileY, xvpCoordinate, yvpCoordinate
+        
