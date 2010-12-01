@@ -92,17 +92,22 @@ class TileMap:
           
     def updatePlayer(self, player):
         if self.players.has_key(player.id):
-            # Check to see if player is attacking
+            # Check to see if player is attacking or finished attacking
             if player.attacking:
                 self.players[player.id].attack()
+            elif not player.attacking:
+                self.players[player.id].attacking = False
+                
             # Check to see if were dying 
-            elif player.health <= 0:
+            if player.health <= 0:
                 self.players[player.id].die()
             else:
                 self.players[player.id].gotoTile(player.x, player.y)
         else:
-            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zeldamove.png'), player.x,player.y) 
-
+            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zelda_move.png'), player.x,player.y) 
+            # Add the death and attacking images
+            self.players[player.id].addAttackImages(utils.load_sliced_sprites(32, 32, 'characters/zelda_atk.png'))
+            self.players[player.id].addDeathImages(utils.load_sliced_sprites(32, 32, 'characters/zelda_dead.png'))
         
     def inView(self, tileX, tileY):
         startXTile = math.floor(float(self.xvpCoordinate) / self.tileWidth)

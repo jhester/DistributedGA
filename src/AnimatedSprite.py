@@ -41,6 +41,12 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self._frame = self.direction*self.frames_per_direction
         self.image = self._images[self._frame]
 
+    def addDeathImages(self, images):
+        self.death_images = images
+        
+    def addAttackImages(self, images):
+        self.atk_images = images
+            
     def goDirection(self, direction):
         if direction == self.UP:
             self.gotoTile(self.tileX, self.tileY-1)
@@ -91,13 +97,16 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.goDirection(self.DOWN)
         
     def attack(self):
-        # Do some attacking?
+        # Do some attacking
+        self.moving = False
         self.attacking = True
         
     def die(self):
-        # die somehow?
-        if not self.dead:
-            self.dead = True
+        # Die, no more movement, etc, just display dead person frame
+        self.moving = False
+        self.dead = True
+        
+        
             
     def update(self, t, screen, xvpCoordinate, yvpCoordinate, screenOffset, tileHeight, vpDimensions):
         # Note that this doesn't work if it's been more that self._delay
@@ -116,8 +125,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.image = self._images[self._frame]
             self._last_update = t
             
-        # go ahead and draw right here
-        # So we know were in the view, now calculate where we are
+        # So we know were in the view, now calculate where we are if were moving
         startXTile = math.floor(float(xvpCoordinate) / tileHeight)
         startYTile = math.floor(float(yvpCoordinate) / tileHeight)
         xdiff = xvpCoordinate-startXTile*tileHeight
