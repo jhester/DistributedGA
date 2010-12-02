@@ -3,6 +3,9 @@ class constant_class:
 	observercode = 1
 	clientcode = 0
 
+	#AI stuffs
+	AIvarcount = 2
+
 	#I don't think this is used
 	#please check, and delete if not used
 	mapwidth = 40 
