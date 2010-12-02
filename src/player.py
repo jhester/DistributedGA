@@ -13,6 +13,10 @@ class player_class:
         self.y = y
         self.health = 25
         self.id = id
+
+        #Important!!!! MAKE SURE TO UPDATE AI COUNT IN CONSTANT
+        self.TEMP_aiVar1 = 1
+        self.TEMP_aiVar2 = 2
         
     #update the players position based on a direction
     def moveByDirection(self, direction, map):
@@ -43,6 +47,14 @@ class player_class:
         self.x = x
         self.y = y
         self.health = 25
+
+    #return a list of AI variables
+    def getAI(self):
+        return (self.TEMP_aiVar1, self.TEMP_aiVar2)
+
+    #set the AI vars, should be in same order as getAI
+    def setAI(self, vars):
+        (self.TEMP_aiVar1, self.TEMP_aiVar2) = vars
 
 class blockManager_class:
     def __init__(self, map):
@@ -280,3 +292,36 @@ class playerManager_class:
                     locallist.append(j.packSmall())
 
         return pickle.dumps(locallist)
+
+#a manager for AI
+class AIManager_class:
+    def __init__(self):
+        self.AIlist = []        
+
+    def empty(self):
+        self.AIlist = []
+
+    #populate our list of AIs using the players we were given
+    def set(self, players):
+        self.empty()
+        for player in players:
+            self.AIlist.append(player.getAI())
+
+    #return an AI var list
+    def get(self):
+        result = []
+        
+        #if there are no AIs to draw from just make a random one
+        if len(self.AIlist) == 0:
+            for i in range(constant_class.AIvarcount):
+                result.append(random.randint(0,100))
+
+            return result
+
+        #create an AI from our list
+        for i in range(constant_class.AIvarcount):
+            #get random source AI
+            AI = self.AIlist[random.randint(0,len(self.AIlist)-1)]
+            result.append(AI[i])
+
+        return result
