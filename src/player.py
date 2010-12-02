@@ -244,6 +244,14 @@ class playerManager_class:
     def getDeadList(self):
         return self.deadlist
 
+    def getLiveList(self):
+        result = []
+        for p in self.playerlist:
+            if not p.isDead():
+                result.append(p)
+
+        return result
+
     #return a list of player IDs and what has changed
     def getPlayerList(self):
         return self.playerlist
