@@ -3,7 +3,7 @@
 import os, glob, math
 import pygame
 import utils
-import AnimatedSprite
+import AnimatedSprite, OverlordSprite
 from pygame.locals import *
 
 if not pygame.font: print 'Warning, fonts disabled'
@@ -99,7 +99,7 @@ class TileMap:
                 p2 = self.players[key]
                 if not p2 == p1 and not p2.dead:
                     if p2.tileX == p1.tileY and p2.tileX == p1.tileY:
-                        p1.attacking()
+                        p1.attack()
                 
             # Check to see if were dying 
             if player.health <= 0:
@@ -178,8 +178,8 @@ class TileMap:
         startXTile = math.floor(float(self.xvpCoordinate) / self.tileWidth)
         startYTile = math.floor(float(self.yvpCoordinate) / self.tileHeight)
         
-        for x in range(startXTile, startXTile + self.numXTiles):
-            for y in range(startYTile, startYTile + self.numYTiles):
+        for x in range(int(startXTile), int(startXTile + self.numXTiles)):
+            for y in range(int(startYTile), int(startYTile + self.numYTiles)):
                 self.tileLayer.blit(self.tiles[self.tileData1[y][x]], ((x - startXTile) * self.tileWidth, (y - startYTile) * self.tileHeight))
                 if self.tileData2[y][x] is not '1':
                     self.tileLayer.blit(self.tiles[self.tileData2[y][x]], ((x - startXTile) * self.tileWidth, (y - startYTile) * self.tileHeight))

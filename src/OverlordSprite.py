@@ -2,7 +2,7 @@ import pygame
 import constant
 import math
 
-class AnimatedSprite(pygame.sprite.Sprite):
+class OverlordSprite(pygame.sprite.Sprite):
     
     def __init__(self, images, tileX, tileY, start_direction = 0, frames_per_direction = 3, fps = 4, map = None):
         pygame.sprite.Sprite.__init__(self)
@@ -62,6 +62,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         if not self.moving:
             # Figure out what general direction were going, even if we cant go there we have to
             # at least turn
+            print 'made it'
             diffX = tileX - self.tileX
             diffY = tileY - self.tileY
             if math.fabs(diffY) >= math.fabs(diffX):
@@ -71,16 +72,20 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 if diffX > 0: self.direction = self.RIGHT
                 else: self.direction = self.LEFT
             self.directionChanged = True
-
-            # Set the destination
-            self.moving = True
-            self.lastTileX = self.tileX
-            self.lastTileY = self.tileY
+                
+            # FIgure out if we can move and setup movement
+            if self.map is not None and self.map.isWalkable(tileX, tileY):
         
-            self.tileX = tileX
-            self.tileY = tileY;
-            # Reset the step
-            self.step = 0
+                # Set the destination
+                self.moving = True
+                self.lastTileX = self.tileX
+                self.lastTileY = self.tileY
+        
+                self.tileX = tileX
+                self.tileY = tileY;
+                
+                # Reset the step
+                self.step = 0
             
         
     def handleKeyUp(self, evt):
@@ -98,12 +103,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.moving = False
         self.attacking = True
         
-        
     def die(self):
         # Die, no more movement, etc, just display dead person frame
         self.moving = False
         self.dead = True
-        self.image = self.death_images[0]
         
         
             
@@ -111,53 +114,47 @@ class AnimatedSprite(pygame.sprite.Sprite):
         # Note that this doesn't work if it's been more that self._delay
         # time between calls to update(); we only update the image once
         # then, but it really should be updated twice.
+            
+        # Animate
+        if self.directionChanged is True:
+            self._frame = self.direction*self.frames_per_direction
+            self.directionChanged = False
+            self.image = self._images[self._frame]
+            
+        if self.moving is True and t - self._last_update > self._delay:
+            self._frame += 1
+            if self._frame >= len(self._images) / 4 + self.direction*self.frames_per_direction: self._frame = self.direction*self.frames_per_direction
+            self.image = self._images[self._frame]
+            self._last_update = t
+            
         # So we know were in the view, now calculate where we are if were moving
         startXTile = math.floor(float(xvpCoordinate) / tileHeight)
         startYTile = math.floor(float(yvpCoordinate) / tileHeight)
         xdiff = xvpCoordinate-startXTile*tileHeight
         ydiff = yvpCoordinate-startYTile*tileHeight
-            
+        xdstep=0
+        ydstep=0
+        
         start = (screenOffset[0]-xdiff+(self.lastTileX-startXTile)*32,screenOffset[1]-ydiff+(self.lastTileY-startYTile)*32)
-
-        if self.dead:
-                screen.blit(self.image, start)
-        elif self.attacking:  
-            screen.blit(self.image, start)
-            print 'attacking'
-        else:
-            # Animate
-            if self.directionChanged is True:
-                self._frame = self.direction*self.frames_per_direction
-                self.directionChanged = False
-                self.image = self._images[self._frame]
-                
-            if self.moving is True and t - self._last_update > self._delay:
-                self._frame += 1
-                if self._frame >= len(self._images) / 4 + self.direction*self.frames_per_direction: self._frame = self.direction*self.frames_per_direction
-                self.image = self._images[self._frame]
-                self._last_update = t
-                
-            xdstep=0
-            ydstep=0
+        end = (screenOffset[0]-xdiff+(self.tileX-startXTile)*32,screenOffset[1]-ydiff+(self.tileY-startYTile)*32)
             
-            end = (screenOffset[0]-xdiff+(self.tileX-startXTile)*32,screenOffset[1]-ydiff+(self.tileY-startYTile)*32)
-                
-            # Calculate where we moving to and where we coming from
-            #if self.lastTileX != self.tileX or self.lastTileY != self.tileY: 
-            if self.step != self.velocity:
-                self.step+=1
-                xdstep = (end[0]-start[0]) / self.velocity
-                ydstep = (end[1]-start[1]) / self.velocity
-                start = (start[0]+xdstep*self.step,start[1]+ydstep*self.step)
-            else:
-                self.step=0  
-                self.moving = False
-                self.lastTileX = self.tileX
-                self.lastTileY = self.tileY
-                start = end
+        # Calculate where we moving to and where we coming from
+        #if self.lastTileX != self.tileX or self.lastTileY != self.tileY: 
+        if self.step != self.velocity:
+            self.step+=1
+            xdstep = (end[0]-start[0]) / self.velocity
+            ydstep = (end[1]-start[1]) / self.velocity
+            start = (start[0]+xdstep*self.step,start[1]+ydstep*self.step)
+        else:
+            self.step=0  
+            self.moving = False
+            self.lastTileX = self.tileX
+            self.lastTileY = self.tileY
+            start = end
            
         #screen.blit(self.image, (screenOffset[0]+xvpCoordinate - (startXTile * tileHeight), screenOffset[1]+yvpCoordinate - (startYTile * tileHeight)))
         #screen.blit(self.image, screenOffset, (xvpCoordinate - (startXTile * tileHeight), yvpCoordinate - (startYTile * tileHeight)) + vpDimensions)
         screen.blit(self.image, start)
+        print start
         #screen.blit(self.image, self.rect.topleft)
         
