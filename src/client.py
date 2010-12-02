@@ -44,13 +44,18 @@ s.send(str(constant.constant_class.clientcode))
 maplvl = s.recv(64)
 map = mapLoader_class('level'+maplvl+'_col.lvl')
 
+
+#courage variable (hardcode for now)
+courage = 20
+
+
 #main loop
 while 1:
     #recieve position and local players
     ((xpos, ypos, health), localplayers) = pickle.loads(s.recv(4096))
     localplayers = pickle.loads(localplayers)
-
-    #find the closest player, move toward it
+    
+    #find the closest player
     closestX = 0
     closestY = 0
     closestDist = 9999
@@ -60,34 +65,53 @@ while 1:
             closestDist = thisDist
             closestX = x
             closestY = y
-    
+
     #did not find a player close enough
     if closestDist > 10:
        dir = random.randint(0,4)
+
     #found a player to go to
+    # attack or run away?    
+    if random.randint(0,100) > courage:
+       if randBool():
+          if closestX > xpos:
+             dir = 3
+          elif closestX < xpos:
+             dir = 1
+          elif closestY > ypos:
+             dir = 0
+          elif closestY < ypos:
+             dir = 2
+       else:
+          if closestY > ypos:
+             dir = 0
+          elif closestY < ypos:
+             dir = 2
+          elif closestX > xpos:
+             dir = 3
+          elif closestX < xpos:
+             dir = 1
     else:
        if randBool():
-           if closestX > xpos:
-               dir = 1
-           elif closestX < xpos:
-               dir = 3
-           elif closestY > ypos:
-               dir = 2
-           elif closestY < ypos:
-               dir = 0
-           else:
-               dir = 4
+          if closestX > xpos:
+             dir = 1
+          elif closestX < xpos:
+             dir = 3
+          elif closestY > ypos:
+             dir = 2
+          elif closestY < ypos:
+             dir = 0
        else:
-           if closestY > ypos:
-               dir = 2
-           elif closestY < ypos:
-               dir = 0
-           elif closestX > xpos:
-               dir = 1
-           elif closestX < xpos:
-               dir = 3
-           else:
-               dir = 4
+          if closestY > ypos:
+             dir = 2
+          elif closestY < ypos:
+             dir = 0
+          elif closestX > xpos:
+             dir = 1
+          elif closestX < xpos:
+             dir = 3
+          else:
+             dir = 4
                                                                                         
     #wait a little or we will generate too much traffic
     time.sleep(random.random())
