@@ -64,24 +64,56 @@ class playerConnectionHandler(threading.Thread):
         # if packet code is spawn then (Info) = player.packAI()    <-- All the AI data
         # if packet code is main then (Info) = (player.packSmall(), playermanager.packLocal(player))
         ##################################        
-        while 1:
-            #send (data,localplayers)
-            s = pickle.dumps((self.player.packSmall(),playermanager.packLocal(self.player)))
-            self.conn.send(s)
 
+        #This is just a basic frame work simmilar to end product
+        while 1:
+            #start in main mode            
+            self.modeMain()
+            #if bumped out of main wait in heartbeat
+            self.modeHeartbeat()
+
+    def modeHeartbeat(self):
+        global heartbeatDelay
+        
+        print "Thread ("+str(self.id)+") with player ("+str(self.player.id)+") enterting heatbeat mode"
+        while self.player.isDead():
+            #send a heart beat
+            self.conn.send(pickle.dumps((constant_class.packet_heartbeat, heartbeatDelay)))
+
+            try:
+                pk_code = int(self.conn.recv(1024))
+            except:
+                print "PlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)
+                playermanager.removePlayer(self.player)
+                sys.exit()
+                                                            
+            #client should be sending heartbeat back
+            if not pk_code == constant_class.packet_heartbeat:
+                print "Error: client not in same mode as server!"
+
+            #wait until next heartbeat
+            time.sleep(heartbeatDelay)
+
+
+    def modeMain(self):
+        print "Thread ("+str(self.id)+") with player ("+str(self.player.id)+") enterting main mode"
+        global playermanager
+
+        #stay in this mode as long as we are alive
+        while not self.player.isDead():
+            #send (playerdata,localplayers)
+            self.conn.send(pickle.dumps((constant_class.packet_main,(self.player.packSmall(),playermanager.packLocal(self.player)))))
+            
             #we should be reciving a direction
             try:
                 self.data = int(self.conn.recv(1024))
             except:
                 print "PlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)
                 playermanager.removePlayer(self.player)
-                return
+                sys.exit()
 
-            #TEMP TEMP TEMP
-            #currently we just don't move the player if its dead
-            if not self.player.isDead():
-                playermanager.movePlayerDir(self.player, self.data)
-            
+            #move the player
+            playermanager.movePlayerDir(self.player, self.data)            
 
     #getter for id
     def getId(self):
@@ -169,6 +201,7 @@ if __name__ == "__main__":
     map = mapLoader_class('level'+str(maplvl)+'_col.lvl')
     playermanager = playerManager_class(map)
     playerthreadlist = []
+    heartbeatDelay = 5
 
     #startup the game master
     gamemaster = gameMaster(playermanager, playerthreadlist)
