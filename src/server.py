@@ -54,18 +54,20 @@ class playerConnectionHandler(threading.Thread):
 
         #send maplvl
         self.conn.send(str(maplvl))
-        
+
+        ##################################
+        #New server to client protocal
+        #Send in this format....
+        #  (Packet code, (Info))
+        #
+        # if packet code is heartbeat then (Info) = None
+        # if packet code is spawn then (Info) = player.packAI()    <-- All the AI data
+        # if packet code is main then (Info) = (player.packSmall(), playermanager.packLocal(player))
+        ##################################        
         while 1:
-            #TEMP TEMP TEMP
-            #end connection if player is dead
-            if self.player.health <= 0:
-                print "TERMINATING self.id="+str(self.id)+" player.id="+str(self.player.id)
-                playermanager.removePlayer(self.player)
-                self.conn.close()
-                return
-            
             #send (data,localplayers)
-            self.conn.send(pickle.dumps((self.player.packSmall(),playermanager.packLocal(self.player))))
+            s = pickle.dumps((self.player.packSmall(),playermanager.packLocal(self.player)))
+            self.conn.send(s)
 
             #we should be reciving a direction
             try:
@@ -74,8 +76,11 @@ class playerConnectionHandler(threading.Thread):
                 print "PlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)
                 playermanager.removePlayer(self.player)
                 return
-                
-            playermanager.movePlayerDir(self.player, self.data)
+
+            #TEMP TEMP TEMP
+            #currently we just don't move the player if its dead
+            if not self.player.isDead():
+                playermanager.movePlayerDir(self.player, self.data)
             
 
     #getter for id
@@ -90,7 +95,7 @@ class playerConnectionHandler(threading.Thread):
     def doDamage(self):
         if self.player == None:
             return
-        
+
         global playermanager
         playermanager.attack(self.player)
 
@@ -120,28 +125,39 @@ class observerConnectionHandler(threading.Thread):
 #spawning new players, determining game end,
 #doing damage
 class gameMaster(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)        
-        self.minPlayers = 15 #number of players required to start round
-        self.endCount = 5 #number of players alive to end round
+    def __init__(self, playermanager, playerthreadlist):
+        threading.Thread.__init__(self)
+        self.playermanager = playermanager
+        self.playerthreadlist = playerthreadlist
+        
+        self.minPlayers = 7 #number of players required to start round
+        self.endCount = 10 #number of players alive to end round
 
     def run(self):
-        global playermanager
-        global playerthreadlist
-
         #main loop where we pause movement and do damage
         while 1:
             #prevent players from moving while we do damage
             time.sleep(0.5)
-            playermanager.pause()
+            self.playermanager.pause()
 
             #tell all threads to 'attack'
-            for thread in playerthreadlist:
-                thread.doDamage()
+            for thread in self.playerthreadlist:
+                thread.doDamage()            
 
             #allow movement again
-            playermanager.resume()
+            self.playermanager.resume()
 
+            if len(self.playermanager.getPlayerList()) > self.minPlayers:
+                if len(self.playermanager.getPlayerList()) - len(self.playermanager.getDeadList()) < self.endCount:
+                    print "GameMaster: End count ("+str(self.endCount)+") reached, starting new game!"
+                    self.newGame()
+
+    #start a new game
+    def newGame(self):
+        #respawn all players
+        for thread in self.playerthreadlist:
+            self.playermanager.respawn(thread.player)
+            
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
     if len(sys.argv) < 2:
@@ -155,7 +171,7 @@ if __name__ == "__main__":
     playerthreadlist = []
 
     #startup the game master
-    gamemaster = gameMaster()
+    gamemaster = gameMaster(playermanager, playerthreadlist)
     gamemaster.start()
 
     #initlize socket
