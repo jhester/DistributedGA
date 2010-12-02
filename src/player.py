@@ -11,7 +11,7 @@ class player_class:
     def __init__(self, x, y, id):
         self.x = x
         self.y = y
-        self.health = 100
+        self.health = 25
         self.id = id
         
     #update the players position based on a direction
@@ -38,12 +38,18 @@ class player_class:
             return True
         return False
 
+    #a function to restore a player to brand new condition
+    def respawn(self, x, y):
+        self.x = x
+        self.y = y
+        self.health = 25
+
 class blockManager_class:
     def __init__(self, map):
         self.blockWidth = 5
 
-        self.mapsize = map.width
-        self.blocksPerSide = int(map.width/self.blockWidth)
+        self.mapsize = map.width+1
+        self.blocksPerSide = int(self.mapsize/self.blockWidth)
         self.blockCount = self.blocksPerSide*self.blocksPerSide
         self.blocks = []
         self.createBlocks()
@@ -62,14 +68,22 @@ class blockManager_class:
             return
 
         #remove from old block, add to new block
-        oldBlock.remove(player)
+        try:
+            oldBlock.remove(player)
+        except:
+            pass
+        
         newBlock.append(player)        
 
     def addPlayer(self, player):
         self.getBlock(player.x, player.y).append(player)
 
     def removePlayer(self, player):
-        self.getBlock(player.x, player.y).remove(player)
+        try:
+            self.getBlock(player.x, player.y).remove(player)
+            print "Player ("+str(player.id)+") removed from block manager"        
+        except:
+            print "Player ("+str(player.id)+") could noe be removed from block"
 
     def getBlock(self, x, y):
         x = int(x/self.blockWidth)
@@ -105,6 +119,7 @@ class blockManager_class:
 #class to manage all players, creation/deletion etc
 class playerManager_class:
     def __init__(self, map):
+        self.deadlist = []
         self.playerlist = []
         self.map = map
         self.prevID = 0
@@ -138,6 +153,22 @@ class playerManager_class:
         
         return newplayer
 
+    #bring a player back to life
+    def respawn(self, player):
+        #find a starting position
+        while True:
+            x = int(random.random()*self.map.width)
+            y = int(random.random()*self.map.height)
+            if self.map.isWalkable(x,y):
+                break
+
+        #set the player to new condition
+        player.respawn(x,y)
+
+        #make undead
+        self.removeFromDeadList(player)
+        
+                                                    
     def removePlayer(self, player):
         self.blockManager.removePlayer(player)
         self.playerlist.remove(player)
@@ -156,18 +187,50 @@ class playerManager_class:
         #update blocks
         self.blockManager.updatePlayer(oldx, oldy, player)
 
-    #do damage to other players on the same tile
+    #handle a players attack
     def attack(self, p1):
-        if p1.health <= 0:
+        if p1.isDead():
             return
         
         locallist = self.blockManager.getBlock(p1.x, p1.y)
         for p2 in locallist:
-            if not p2 == p1 and p2.health > 0:
+            if not p2 == p1 and not p2.isDead():
                 if p2.x == p1.x and p2.y == p1.y:
-                    p2.health -= 1
-                    if p2.health <= 0:
-                        print "Player ("+str(p2.id)+") died!"
+                    self.damagePlayer(p2)
+
+    #deal damage to a player
+    def damagePlayer(self, player):        
+        if not player.isDead():
+            player.health -= 1
+            if player.isDead():
+                print "Player ("+str(player.id)+") died!"
+                self.addPlayerToDeadList(player)
+
+    #a list to keep track of dead players
+    def addPlayerToDeadList(self, player):
+        if not player.isDead():
+            print "Warning: Adding living player("+str(player.id)+") to dead list!"
+            
+        if self.deadlist.count(player) == 0:
+            self.deadlist.append(player)
+
+        self.blockManager.removePlayer(player)
+
+    def removeFromDeadList(self, player):
+        if player.isDead():
+            print "Warning: Removing dead player ("+str(player.id)+") from dead list!"
+
+        #is there a better way than try statements?
+        try:
+            self.deadlist.remove(player)
+        except:
+            pass
+
+    def clearDeadList(self):
+        self.deadlist = []
+
+    def getDeadList(self):
+        return self.deadlist
 
     #return a list of player IDs and what has changed
     def getPlayerList(self):
