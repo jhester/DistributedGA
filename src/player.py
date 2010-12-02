@@ -42,8 +42,8 @@ class blockManager_class:
     def __init__(self, map):
         self.blockWidth = 5
 
-        self.mapsize = map.width
-        self.blocksPerSide = int(map.width/self.blockWidth)
+        self.mapsize = map.width+1
+        self.blocksPerSide = int(self.mapsize/self.blockWidth)
         self.blockCount = self.blocksPerSide*self.blocksPerSide
         self.blocks = []
         self.createBlocks()
