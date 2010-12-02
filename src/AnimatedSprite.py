@@ -71,20 +71,17 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 if diffX > 0: self.direction = self.RIGHT
                 else: self.direction = self.LEFT
             self.directionChanged = True
-                
-            # FIgure out if we can move and setup movement
-            if self.map is not None and self.map.isWalkable(tileX, tileY):
+
+            # Set the destination
+            self.moving = True
+            self.lastTileX = self.tileX
+            self.lastTileY = self.tileY
         
-                # Set the destination
-                self.moving = True
-                self.lastTileX = self.tileX
-                self.lastTileY = self.tileY
-        
-                self.tileX = tileX
-                self.tileY = tileY;
-                
-                # Reset the step
-                self.step = 0
+            self.tileX = tileX
+            self.tileY = tileY;
+            # Reset the step
+            self.step = 0
+            
         
     def handleKeyUp(self, evt):
         if evt.key == pygame.K_a:
@@ -153,5 +150,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
         #screen.blit(self.image, (screenOffset[0]+xvpCoordinate - (startXTile * tileHeight), screenOffset[1]+yvpCoordinate - (startYTile * tileHeight)))
         #screen.blit(self.image, screenOffset, (xvpCoordinate - (startXTile * tileHeight), yvpCoordinate - (startYTile * tileHeight)) + vpDimensions)
         screen.blit(self.image, start)
+        print start
         #screen.blit(self.image, self.rect.topleft)
         
