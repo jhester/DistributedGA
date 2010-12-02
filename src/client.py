@@ -46,8 +46,7 @@ map = mapLoader_class('level'+maplvl+'_col.lvl')
 
 
 #courage variable (hardcode for now)
-courage = 20
-
+courage = 90
 
 #main loop
 while 1:
@@ -71,7 +70,7 @@ while 1:
        dir = random.randint(0,4)
 
     #found a player to go to
-    # attack or run away?    
+    #run away
     if random.randint(0,100) > courage:
        if randBool():
           if closestX > xpos:
@@ -91,6 +90,7 @@ while 1:
              dir = 3
           elif closestX < xpos:
              dir = 1
+    #attack
     else:
        if randBool():
           if closestX > xpos:
