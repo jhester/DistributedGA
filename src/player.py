@@ -93,9 +93,8 @@ class blockManager_class:
     def removePlayer(self, player):
         try:
             self.getBlock(player.x, player.y).remove(player)
-            print "Player ("+str(player.id)+") removed from block manager"        
         except:
-            print "Player ("+str(player.id)+") could noe be removed from block"
+            pass
 
     def getBlock(self, x, y):
         x = int(x/self.blockWidth)
