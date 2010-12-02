@@ -32,6 +32,12 @@ class player_class:
         self.y = data[1]
         self.health = data[2]
 
+    #determine if the player is currently dead
+    def isDead(self):
+        if self.health <= 0:
+            return True
+        return False
+
 class blockManager_class:
     def __init__(self, map):
         self.blockWidth = 5
