@@ -8,7 +8,6 @@ import math
 
 import constant
 from maploader import mapLoader_class
-from player import *
 
 def randBool():
     return random.choice((1, 0))
@@ -61,29 +60,34 @@ while 1:
             closestDist = thisDist
             closestX = x
             closestY = y
-
-    if randBool():
-        if closestX > xpos:
-            dir = 1
-        elif closestX < xpos:
-            dir = 3
-        elif closestY > ypos:
-            dir = 2
-        elif closestY < ypos:
-            dir = 0
-        else:
-            dir = 4
+    
+    #did not find a player close enough
+    if closestDist == 9999:
+       dir = random.randint(0,4)
+    #found a player to go to
     else:
-        if closestY > ypos:
-            dir = 2
-        elif closestY < ypos:
-            dir = 0
-        elif closestX > xpos:
-            dir = 1
-        elif closestX < xpos:
-            dir = 3
-        else:
-            dir = 4
+       if randBool():
+           if closestX > xpos:
+               dir = 1
+           elif closestX < xpos:
+               dir = 3
+           elif closestY > ypos:
+               dir = 2
+           elif closestY < ypos:
+               dir = 0
+           else:
+               dir = 4
+       else:
+           if closestY > ypos:
+               dir = 2
+           elif closestY < ypos:
+               dir = 0
+           elif closestX > xpos:
+               dir = 1
+           elif closestX < xpos:
+               dir = 3
+           else:
+               dir = 4
                                                                                         
     #wait a little or we will generate too much traffic
     time.sleep(random.random())
