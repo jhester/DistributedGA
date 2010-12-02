@@ -94,7 +94,7 @@ def modeHeartbeat((delay)):
     global sock
 
     sock.send(str(constant_class.packet_heartbeat))
-    time.wait(delay)
+    time.sleep(delay)
 
 #if a spawn packet is recieved
 def modeSpawn():
