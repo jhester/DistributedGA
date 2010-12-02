@@ -17,7 +17,7 @@ time = 0
 running = True
 mapscene.addPlayer(player.player_class(1, 20, 1))
 #mapscene.addPlayer(player.player_class(1, 2, 2))
-overlord = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'alien.png'), 6,6) 
+overlord = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/alien.png'), 6,6, 0, 3, 3, mapscene) 
 mapscene.setOverlord(overlord)
 
 while running:

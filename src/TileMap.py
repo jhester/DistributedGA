@@ -3,7 +3,7 @@
 import os, glob, math
 import pygame
 import utils
-import AnimatedSprite
+import AnimatedSprite, OverlordSprite
 from pygame.locals import *
 
 if not pygame.font: print 'Warning, fonts disabled'
@@ -82,7 +82,7 @@ class TileMap:
         self.ratio = self.minimap.get_height()/self.map_size
 
     def addPlayer(self, player):
-            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zeldamove.png'), player.x,player.y) 
+            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zelda_move.png'), player.x,player.y) 
     
     def setOverlord(self, sprite):
         self.overlord = sprite
@@ -93,10 +93,13 @@ class TileMap:
     def updatePlayer(self, player):
         if self.players.has_key(player.id):
             # Check to see if player is attacking or finished attacking
-            if player.attacking:
-                self.players[player.id].attack()
-            elif not player.attacking:
-                self.players[player.id].attacking = False
+            p1 = self.players[player.id]
+            list = self.players.keys()
+            for key in list:
+                p2 = self.players[key]
+                if not p2 == p1 and not p2.dead:
+                    if p2.tileX == p1.tileY and p2.tileX == p1.tileY:
+                        p1.attack()
                 
             # Check to see if were dying 
             if player.health <= 0:
@@ -175,8 +178,8 @@ class TileMap:
         startXTile = math.floor(float(self.xvpCoordinate) / self.tileWidth)
         startYTile = math.floor(float(self.yvpCoordinate) / self.tileHeight)
         
-        for x in range(startXTile, startXTile + self.numXTiles):
-            for y in range(startYTile, startYTile + self.numYTiles):
+        for x in range(int(startXTile), int(startXTile + self.numXTiles)):
+            for y in range(int(startYTile), int(startYTile + self.numYTiles)):
                 self.tileLayer.blit(self.tiles[self.tileData1[y][x]], ((x - startXTile) * self.tileWidth, (y - startYTile) * self.tileHeight))
                 if self.tileData2[y][x] is not '1':
                     self.tileLayer.blit(self.tiles[self.tileData2[y][x]], ((x - startXTile) * self.tileWidth, (y - startYTile) * self.tileHeight))

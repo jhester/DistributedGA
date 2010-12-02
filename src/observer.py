@@ -9,6 +9,7 @@ import time
 import pygame
 import TileMap
 import AnimatedSprite
+import OverlordSprite
 import utils
 from constant import constant_class
 from maploader import mapLoader_class
@@ -44,7 +45,7 @@ mapscene = TileMap.TileMap("level"+maplvl)
 playermanager = playerManager_class(map)
 
 #add overlord
-overlord = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/alien.png'), 6,6, 0, 3, 3, mapscene) 
+overlord = OverlordSprite.OverlordSprite(utils.load_sliced_sprites(32, 32, 'characters/alien.png'), 6,6, 0, 3, 3, mapscene) 
 mapscene.setOverlord(overlord)
 
 #main loop
