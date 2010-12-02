@@ -3,7 +3,7 @@
 import os, glob, math
 import pygame
 import utils
-import AnimatedSprite
+import AnimatedSprite, OverlordSprite
 from pygame.locals import *
 
 if not pygame.font: print 'Warning, fonts disabled'

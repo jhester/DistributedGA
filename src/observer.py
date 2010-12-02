@@ -8,12 +8,12 @@ import pickle
 import time
 import pygame
 import TileMap
-import AnimatedSprite, OverlordSprite
+import AnimatedSprite
+import OverlordSprite
 import utils
 from constant import constant_class
 from maploader import mapLoader_class
 from player import *
-from OverlordSprite import OverlordSprite
 
 #don't be hatin
 if not len(sys.argv) == 3:
