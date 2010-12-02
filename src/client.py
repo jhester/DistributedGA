@@ -62,7 +62,7 @@ while 1:
             closestY = y
     
     #did not find a player close enough
-    if closestDist == 9999:
+    if closestDist > 10:
        dir = random.randint(0,4)
     #found a player to go to
     else:
