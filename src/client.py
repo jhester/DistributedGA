@@ -40,50 +40,50 @@ def modeMain(((xpos, ypos, health), localplayers)):
     #did not find a player close enough
     if closestDist > 10:
         dir = random.randint(0,4)
-                                                                                               
-    #found a player to go to
-    #run away
-    if random.randint(0,100) > courage:
-        if randBool():
-            if closestX > xpos:
-                dir = 3
-            elif closestX < xpos:
-                dir = 1
-            elif closestY > ypos:
-                dir = 0
-            elif closestY < ypos:
-                dir = 2
-        else:
-            if closestY > ypos:
-                dir = 0
-            elif closestY < ypos:
-                dir = 2
-            elif closestX > xpos:
-                dir = 3
-            elif closestX < xpos:
-                dir = 1                    
-    #attack
     else:
-        if randBool():
-            if closestX > xpos:
-                dir = 1
-            elif closestX < xpos:
-                dir = 3
-            elif closestY > ypos:
-                dir = 2
-            elif closestY < ypos:
-                dir = 0
-        else:
-            if closestY > ypos:
-                dir = 2
-            elif closestY < ypos:
-                dir = 0
-            elif closestX > xpos:
-                dir = 1
-            elif closestX < xpos:
-                dir = 3
+        #found a player to go to
+        #run away
+        if random.randint(0,100) > courage:
+            if randBool():
+                if closestX > xpos:
+                    dir = 3
+                elif closestX < xpos:
+                    dir = 1
+                elif closestY > ypos:
+                    dir = 0
+                elif closestY < ypos:
+                    dir = 2
             else:
+                if closestY > ypos:
+                    dir = 0
+                elif closestY < ypos:
+                    dir = 2
+                elif closestX > xpos:
+                    dir = 3
+                elif closestX < xpos:
+                    dir = 1                    
+        #attack
+        else:
+            if closestX == xpos and closestY == ypos:
                 dir = 4
+            elif randBool():
+                if closestX > xpos:
+                    dir = 1
+                elif closestX < xpos:
+                    dir = 3
+                elif closestY > ypos:
+                    dir = 2
+                elif closestY < ypos:
+                    dir = 0
+            else:
+                if closestY > ypos:
+                    dir = 2
+                elif closestY < ypos:
+                    dir = 0
+                elif closestX > xpos:
+                    dir = 1
+                elif closestX < xpos:
+                    dir = 3
                 
     #wait a little or we will generate too much traffic
     time.sleep(random.random())
@@ -97,7 +97,7 @@ def modeHeartbeat((delay)):
     time.sleep(delay)
 
 #if a spawn packet is recieved
-def modeSpawn():
+def modeSpawn((temp)):
     global sock
     pass
 
