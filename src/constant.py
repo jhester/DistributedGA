@@ -3,6 +3,9 @@ class constant_class:
 	observercode = 1
 	clientcode = 0
 
+	#client stuff
+	maxHealth = 25
+
 	#AI stuffs
 	AIvarcount = 2
 
@@ -19,3 +22,8 @@ class constant_class:
 	packet_heartbeat = 0
 	packet_spawn = 1
 	packet_main = 2
+
+	#game state
+	game_wait = 0
+	game_main = 1
+	game_spawn = 2
