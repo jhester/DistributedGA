@@ -34,7 +34,7 @@ class genericConnection_class(threading.Thread):
 
             #unknown clients
         else:
-            print "ERROR: Recieved unknown code from client '"+str(data)+"'"
+            print "\033[31mERROR: Recieved unknown code from client '"+str(data)+"'\033[37m"
 
 class playerConnectionHandler(threading.Thread):
     #start with thread with a unique id and the connection for the client
@@ -43,9 +43,9 @@ class playerConnectionHandler(threading.Thread):
         self.id = id
         self.conn = conn
         self.player = None
+        self.runState = constant_class.game_wait
         
     def run(self):
-        print "Player started - " + str(self.id)
         global playermanager
         global maplvl
         
@@ -53,67 +53,92 @@ class playerConnectionHandler(threading.Thread):
         self.player = playermanager.addPlayer()
 
         #send maplvl
-        self.conn.send(str(maplvl))
-
-        ##################################
-        #New server to client protocal
-        #Send in this format....
-        #  (Packet code, (Info))
-        #
-        # if packet code is heartbeat then (Info) = None
-        # if packet code is spawn then (Info) = player.packAI()    <-- All the AI data
-        # if packet code is main then (Info) = (player.packSmall(), playermanager.packLocal(player))
-        ##################################        
+        self.trySend(str(maplvl))
 
         #This is just a basic frame work simmilar to end product
         while 1:
-            #start in main mode            
-            self.modeMain()
-            #if bumped out of main wait in heartbeat
             self.modeHeartbeat()
+            self.modeSpawn()
+            self.modeMain()            
 
     def modeHeartbeat(self):
         global heartbeatDelay
+
+        #if we are not supposed to be waiting
+        if not self.runState == constant_class.game_wait:
+            return
         
         print "Thread ("+str(self.id)+") with player ("+str(self.player.id)+") enterting heatbeat mode"
-        while self.player.isDead():
+        self.player.isPlaying = False
+        
+        while self.runState == constant_class.game_wait:
             #send a heart beat
-            self.conn.send(pickle.dumps((constant_class.packet_heartbeat, heartbeatDelay)))
-
+            self.trySend(pickle.dumps((constant_class.packet_heartbeat, heartbeatDelay)))
+        
             try:
                 pk_code = int(self.conn.recv(1024))
             except:
-                print "PlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)
+                print "\033[31mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
                 playermanager.removePlayer(self.player)
                 sys.exit()
-                                                            
+            
             #client should be sending heartbeat back
             if not pk_code == constant_class.packet_heartbeat:
-                print "Error: client not in same mode as server!"
-
+                print "\033[31mError: client not in same mode as server!\033[37m"
+            
             #wait until next heartbeat
             time.sleep(heartbeatDelay)
 
 
     def modeMain(self):
-        print "Thread ("+str(self.id)+") with player ("+str(self.player.id)+") enterting main mode"
         global playermanager
 
+        #if we are not supposed to be playing
+        if not self.runState == constant_class.game_main:
+            return
+        
+        print "Thread ("+str(self.id)+") with player ("+str(self.player.id)+") enterting main mode"
+        self.player.isPlaying = True
+
         #stay in this mode as long as we are alive
-        while not self.player.isDead():
+        while self.runState == constant_class.game_main:
             #send (playerdata,localplayers)
-            self.conn.send(pickle.dumps((constant_class.packet_main,(self.player.packSmall(),playermanager.packLocal(self.player)))))
+            self.trySend(pickle.dumps((constant_class.packet_main,(self.player.packSmall(),playermanager.packLocal(self.player)))))
             
             #we should be reciving a direction
             try:
                 self.data = int(self.conn.recv(1024))
             except:
-                print "PlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)
+                print "\033[33mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
                 playermanager.removePlayer(self.player)
                 sys.exit()
 
             #move the player
             playermanager.movePlayerDir(self.player, self.data)            
+
+            #check for player death
+            if self.player.isDead():
+                self.runState = constant_class.game_wait
+
+    #send the player a spawn packet then go into play mode
+    def modeSpawn(self):
+        if not self.runState == constant_class.game_spawn:
+            return
+
+        #send the players current AI
+        self.trySend(pickle.dumps((constant_class.packet_spawn,(None))))
+        self.runState = constant_class.game_main
+
+    #respawn our player
+    def respawn(self, AImanager):
+        #don't try to respawn if we don't have a player
+        if self.player == None:
+            return
+
+        global playermanager
+        playermanager.respawn(self.player)
+        self.player.setAI(AImanager.get())
+        self.runState = constant_class.game_spawn
 
     #getter for id
     def getId(self):
@@ -130,7 +155,15 @@ class playerConnectionHandler(threading.Thread):
 
         global playermanager
         playermanager.attack(self.player)
-
+        
+    def trySend(self, str):
+        try:
+            self.conn.send(str)
+        except:
+            print "\033[33mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
+            playermanager.removePlayer(self.player)
+            sys.exit()
+                                                
 class observerConnectionHandler(threading.Thread):
     #start with thread with a unique id and the connection for the client
     def __init__(self, conn):
@@ -161,39 +194,80 @@ class gameMaster(threading.Thread):
         threading.Thread.__init__(self)
         self.playermanager = playermanager
         self.playerthreadlist = playerthreadlist
+        self.AImanager = AIManager_class()
         
-        self.minPlayers = 7 #number of players required to start round
-        self.endCount = 10 #number of players alive to end round
+        self.startCount = 20 #number of players required to start round
+        self.minCount = 10 #min number of connected players (dead or alive) for valid round
+        self.winCount = 10 #number of players alive to end round
 
     def run(self):
-        #main loop where we pause movement and do damage
         while 1:
+            self.modeWait() #wait until we have enough players
+            self.modeSpawn() #give life to players
+            self.modeMain() #let the game play out
+
+    #wait mode is ised to wait for additional players to connect if we don't have enough
+    def modeWait(self):
+        #if we have enough players to start already
+        if len(self.playermanager.getPlayerList()) >= self.startCount:
+            return
+
+        #not enough players, put anyone connected into wait mode, then wait for more players
+        print "\033[32mGameMaster: Not enough players connected\033[37m"
+        for thread in self.playerthreadlist:
+            thread.runState = constant_class.game_wait
+        while len(self.playermanager.getPlayerList()) < self.startCount:
+            time.sleep(5)
+
+    def modeSpawn(self):
+        #make sure we have enough players to start a round
+        if len(self.playermanager.getPlayerList()) < self.startCount:
+            return
+        
+        print "\033[32mGameMaster: Spawning players\033[37m"
+        
+        #respawn all players
+        self.playermanager.emptyDeadList()
+        for thread in self.playerthreadlist:
+            thread.respawn(self.AImanager)
+
+        #wait until atleast the minimum # of players have spawned
+        while self.playermanager.getPlayingCount() < self.minCount:
+            time.sleep(1)
+                                        
+    def modeMain(self):
+        if self.roundIsValid():
+            print "\033[32mGameMaster: Round started\033[37m"
+        
+        while self.roundIsValid():
             #prevent players from moving while we do damage
             time.sleep(0.5)
             self.playermanager.pause()
-
+            
             #tell all threads to 'attack'
             for thread in self.playerthreadlist:
-                thread.doDamage()            
-
+                thread.doDamage()
+            
             #allow movement again
             self.playermanager.resume()
 
-            if len(self.playermanager.getPlayerList()) > self.minPlayers:
-                if len(self.playermanager.getPlayerList()) - len(self.playermanager.getDeadList()) < self.endCount:
-                    print "GameMaster: End count ("+str(self.endCount)+") reached, starting new game!"
-                    self.newGame()
+            #check for round win
+            if self.playermanager.getPlayingCount() < self.winCount:
+                print "\033[32mGameMaster: End count ("+str(self.winCount)+") reached, starting new game!\033[37m"
+                self.AImanager.empty()
+                self.AImanager.set(self.playermanager.getLiveList())
+                return #exit main mode, game is won
 
-    #start a new game
-    def newGame(self):
-        #respawn all players
-        for thread in self.playerthreadlist:
-            self.playermanager.respawn(thread.player)
-            
+    #function to check if the current round is vail (enough players etc)
+    def roundIsValid(self):
+        if self.playermanager.getDeadCount()+self.playermanager.getPlayingCount() > self.minCount:
+            return True
+        return False
+    
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
     if len(sys.argv) < 2:
-        print "ERROR: Usage python server.py <port>"
+        print "\033[31mERROR: Usage python server.py <port>\033[37m"
         sys.exit()
     
     #initlize variables
