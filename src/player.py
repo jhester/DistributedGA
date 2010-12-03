@@ -9,10 +9,11 @@ from constant import *
 
 class player_class:
     def __init__(self, x, y, id):
-        self.x = x
-        self.y = y
-        self.health = 25
-        self.id = id
+        self.x = x #starting x
+        self.y = y #starting y
+        self.health = constant_class.maxHealth #starting health
+        self.id = id #unique player id
+        self.isPlaying = False #is player playing current round?
 
         #Important!!!! MAKE SURE TO UPDATE AI COUNT IN CONSTANT
         self.TEMP_aiVar1 = 1
@@ -46,7 +47,7 @@ class player_class:
     def respawn(self, x, y):
         self.x = x
         self.y = y
-        self.health = 25
+        self.health = constant_class.maxHealth
 
     #return a list of AI variables
     def getAI(self):
@@ -183,6 +184,7 @@ class playerManager_class:
     def removePlayer(self, player):
         self.blockManager.removePlayer(player)
         self.playerlist.remove(player)
+        self.removeFromDeadList(player)
 
     def movePlayerDir(self, player, direction):
         #don't allow movement while paused
@@ -200,18 +202,18 @@ class playerManager_class:
 
     #handle a players attack
     def attack(self, p1):
-        if p1.isDead():
+        if p1.isDead() or not p1.isPlaying:
             return
         
         locallist = self.blockManager.getBlock(p1.x, p1.y)
         for p2 in locallist:
-            if not p2 == p1 and not p2.isDead():
+            if not p2 == p1 and not p2.isDead() and p2.isPlaying:
                 if p2.x == p1.x and p2.y == p1.y:
                     self.damagePlayer(p2)
 
     #deal damage to a player
     def damagePlayer(self, player):        
-        if not player.isDead():
+        if not player.isDead() and player.isPlaying:
             player.health -= 1
             if player.isDead():
                 print "Player ("+str(player.id)+") died!"
@@ -228,28 +230,37 @@ class playerManager_class:
         self.blockManager.removePlayer(player)
 
     def removeFromDeadList(self, player):
-        if player.isDead():
-            print "Warning: Removing dead player ("+str(player.id)+") from dead list!"
-
         #is there a better way than try statements?
         try:
             self.deadlist.remove(player)
         except:
             pass
 
-    def clearDeadList(self):
+    def emptyDeadList(self):
         self.deadlist = []
 
     def getDeadList(self):
         return self.deadlist
+    
+    def getDeadCount(self):
+        return len(self.deadlist)
 
     def getLiveList(self):
         result = []
         for p in self.playerlist:
-            if not p.isDead():
+            if not p.isDead() and p.isPlaying:
                 result.append(p)
 
         return result
+
+    #get the number of players playing in current round
+    def getPlayingCount(self):
+        count = 0
+        for p in self.playerlist:
+            if p.isPlaying:
+                count += 1
+
+        return count
 
     #return a list of player IDs and what has changed
     def getPlayerList(self):
@@ -266,12 +277,18 @@ class playerManager_class:
     def packSmall(self):
         list = []
         for player in self.playerlist:
-            list.append((player.id, player.packSmall()))
+            if player.isPlaying:
+                list.append((player.id, player.packSmall()))
             
         return pickle.dumps(list)
 
     def loadSmall(self, str):
         list = pickle.loads(str)
+
+        #TEMP this is a horrid way of removing old players that are gone
+        self.playerlist = []
+
+        
         for (id, data) in list:
             found = False
             for player in self.playerlist:
@@ -284,7 +301,7 @@ class playerManager_class:
                 player = player_class(0, 0, id)
                 player.loadSmall(data)
                 self.playerlist.append(player)
-
+        
     def packLocal(self, player):
         blocks = self.blockManager.getSurroundingBlocks(player.x, player.y)
         locallist = []
@@ -295,7 +312,7 @@ class playerManager_class:
         #so we don't need to include IDs        
         for i in blocks:
             for j in i:
-                if not j == player:
+                if not j == player and j.isPlaying: #TEMP here j should not be in the block manager if its not playing!!!
                     locallist.append(j.packSmall())
 
         return pickle.dumps(locallist)
