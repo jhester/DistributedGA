@@ -6,9 +6,6 @@ class constant_class:
 	#client stuff
 	maxHealth = 25
 
-	#AI stuffs
-	AIvarcount = 2
-
 	#I don't think this is used
 	#please check, and delete if not used
 	mapwidth = 40 
