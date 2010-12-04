@@ -78,7 +78,7 @@ class playerConnectionHandler(threading.Thread):
             try:
                 pk_code = int(self.conn.recv(1024))
             except:
-                print "\033[31mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
+                print "\033[33mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
                 playermanager.removePlayer(self.player)
                 sys.exit()
             
@@ -126,7 +126,7 @@ class playerConnectionHandler(threading.Thread):
             return
 
         #send the players current AI
-        self.trySend(pickle.dumps((constant_class.packet_spawn,(None))))
+        self.trySend(pickle.dumps((constant_class.packet_spawn,self.player.getAI())))
         self.runState = constant_class.game_main
 
     #respawn our player
@@ -158,7 +158,7 @@ class playerConnectionHandler(threading.Thread):
         
     def trySend(self, str):
         try:
-            self.conn.send(str)
+            self.conn.sendall(str)
         except:
             print "\033[33mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
             playermanager.removePlayer(self.player)
