@@ -14,10 +14,7 @@ class player_class:
         self.health = constant_class.maxHealth #starting health
         self.id = id #unique player id
         self.isPlaying = False #is player playing current round?
-
-        #Important!!!! MAKE SURE TO UPDATE AI COUNT IN CONSTANT
-        self.TEMP_aiVar1 = 1
-        self.TEMP_aiVar2 = 2
+        self.AI = AI_class()
         
     #update the players position based on a direction
     def moveByDirection(self, direction, map):
@@ -49,13 +46,11 @@ class player_class:
         self.y = y
         self.health = constant_class.maxHealth
 
-    #return a list of AI variables
     def getAI(self):
-        return (self.TEMP_aiVar1, self.TEMP_aiVar2)
+        return self.AI.get()
 
-    #set the AI vars, should be in same order as getAI
-    def setAI(self, vars):
-        (self.TEMP_aiVar1, self.TEMP_aiVar2) = vars
+    def setAI(self,vars):
+        self.AI.set(vars)
 
 class blockManager_class:
     def __init__(self, map):
@@ -331,21 +326,44 @@ class AIManager_class:
         for player in players:
             self.AIlist.append(player.getAI())
 
+        print "AI: SET..."
+        print self.AIlist
+
     #return an AI var list
     def get(self):
         result = []
         
         #if there are no AIs to draw from just make a random one
         if len(self.AIlist) == 0:
-            for i in range(constant_class.AIvarcount):
+            for i in range(AI_class.AIvarcount):
                 result.append(random.randint(0,100))
 
+            print "AI: Get: Random: "+str(result)
             return result
 
         #create an AI from our list
-        for i in range(constant_class.AIvarcount):
+        for i in range(AI_class.AIvarcount):
             #get random source AI
             AI = self.AIlist[random.randint(0,len(self.AIlist)-1)]
             result.append(AI[i])
 
+        print "AI: Get: "+str(result)
         return result
+
+class AI_class:
+    #AI stuffs
+    AIvarcount = 4
+
+    def __init__(self):
+        self.courage = 0
+        self.camper = 0
+        self.clingy = 0
+        self.stack = 0
+
+    #return a list of AI variables
+    def get(self):
+        return (self.courage, self.camper, self.clingy, self.stack)
+
+    #set the AI vars, should be in same order as get
+    def set(self, vars):
+        (self.courage, self.camper, self.clingy, self.stack) = vars
