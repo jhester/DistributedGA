@@ -5,12 +5,17 @@ import utils
 import player
 from OverlordSprite import OverlordSprite
 
+# Get the map
+if len(sys.argv) is not 2:
+    print 'Usage: python TileMapTest.py <level number>'
+    sys.exit()
+        
 # Setup pygame
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
 
 # Map scene
-mapscene = TileMap.TileMap('level2')
+mapscene = TileMap.TileMap('level'+sys.argv[1])
 
 # main loop
 time = 0
