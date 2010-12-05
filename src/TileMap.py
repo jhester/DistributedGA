@@ -82,7 +82,7 @@ class TileMap:
         self.ratio = self.minimap.get_height()/self.map_size
 
     def addPlayer(self, player):
-            self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zelda_move.png'), player.x,player.y) 
+        self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zelda_move.png'), player.x,player.y) 
     
     def setOverlord(self, sprite):
         self.overlord = sprite
@@ -97,10 +97,13 @@ class TileMap:
             list = self.players.keys()
             for key in list:
                 p2 = self.players[key]
-                if not p2 == p1 and not p2.dead:
-                    if p2.tileX == p1.tileY and p2.tileX == p1.tileY:
+                if not p2 == p1 and not p2.dead and not p1.dead:
+                    if p2.tileX == p1.tileX and p2.tileY == p1.tileY:
                         p1.attack()
-                
+                    else:
+                        # Make sure were not attacking, now move on
+                        self.players[player.id].gotoTile(player.x, player.y)
+                                    
             # Check to see if were dying 
             if player.health <= 0:
                 self.players[player.id].die()
