@@ -39,6 +39,7 @@ def load_sliced_sprites(w, h, filename):
 
 # Note that the map loaded by this puts its y before x, access it like map[y][x]
 def load_map(map_file):
+    print 'Loading map file: ', map_file
     #try to open from the correct directory, if can't try a local version
     try:
         tileData1 = open('../data/maps/'+map_file).readlines()

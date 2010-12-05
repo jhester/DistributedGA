@@ -1,5 +1,5 @@
-#this is the observer it handles the drawing 
-#and calculation of some player factors
+# This is the observer it handles the drawing 
+# and calculation of some player factors
 
 import socket
 import sys
@@ -17,7 +17,7 @@ from player import *
 
 #don't be hatin
 if not len(sys.argv) == 3:
-    print "Usage python client.py <host> <port>"
+    print "Usage python observer.py <host> <port>"
     sys.exit()
 
 #store host and port from command line
@@ -38,6 +38,7 @@ screen = pygame.display.set_mode((800, 600))
 
 #recv map level
 maplvl = s.recv(64).strip()[0]
+print maplvl
 map = mapLoader_class('level'+maplvl)
 mapscene = TileMap.TileMap("level"+maplvl)
 

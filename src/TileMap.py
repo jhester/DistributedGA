@@ -17,28 +17,8 @@ class TileMap:
         #self.tiles = [pygame.image.load('../data/images/tiles/tile%d.png' % n).convert_alpha() for n in range(6)]
         # Load the tiles
         self.tiles = {}
-        for infile in glob.glob( os.path.join('../data/images/tiles', '*.*') ):
-            self.tiles[infile[len(infile)-5]] = pygame.image.load(infile).convert_alpha()   
+        self.loadMapFile(map_file)
         
-        # Load the sprites
-        self.map_sprites = [pygame.image.load('../data/images/sprites/sprite%d.png' % n).convert_alpha() for n in range(4)]
-        self.map_sprites_rd = [53, 0, 128, 128]
-        self.map_sprites_list = []
-        self.tileWidth, self.tileHeight = self.tiles['0'].get_size()
-        self.map_file = map_file
-        
-        # Load tiles
-        self.tileData1 = utils.load_char_map(self.map_file+'_layer1.lvl')
-        self.tileData2 = utils.load_char_map(self.map_file+'_layer2.lvl')
-        self.col_data = utils.load_map(self.map_file+'_col.lvl')
-        self.map_size = len(self.tileData1[0])-1
-        
-        # Load up sprites
-        self.spriteData = utils.load_map(self.map_file+'_sprites.lvl')
-        for x in range(self.map_size):
-            for y in range(self.map_size):
-                if self.spriteData[y][x] is not 1: self.map_sprites_list.append((x,y,self.spriteData[y][x]))
-
         # Setup the offset and viewport coordinates and dimensions
         self.vpRenderOffset = (0, 0)
         self.vpStatsOffset = (80, 540)
@@ -81,6 +61,29 @@ class TileMap:
         self.box2 = utils.load_image('box2.png')
         self.ratio = self.minimap.get_height()/self.map_size
 
+    def loadMapFile(self, map_file):
+        for infile in glob.glob( os.path.join('../data/images/tiles', '*.*') ):
+            self.tiles[infile[len(infile)-5]] = pygame.image.load(infile).convert_alpha()   
+        
+        # Load the sprites
+        self.map_sprites = [pygame.image.load('../data/images/sprites/sprite%d.png' % n).convert_alpha() for n in range(4)]
+        self.map_sprites_rd = [53, 0, 128, 128]
+        self.map_sprites_list = []
+        self.tileWidth, self.tileHeight = self.tiles['0'].get_size()
+        
+        # Load tiles
+        self.map_file = map_file
+        self.tileData1 = utils.load_char_map(self.map_file+'_layer1.lvl')
+        self.tileData2 = utils.load_char_map(self.map_file+'_layer2.lvl')
+        self.col_data = utils.load_map(self.map_file+'_col.lvl')
+        self.map_size = len(self.tileData1[0])-1
+        
+        # Load up sprites
+        self.spriteData = utils.load_map(self.map_file+'_sprites.lvl')
+        for x in range(self.map_size):
+            for y in range(self.map_size):
+                if self.spriteData[y][x] is not 1: self.map_sprites_list.append((x,y,self.spriteData[y][x]))
+    
     def addPlayer(self, player):
         self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zelda_move.png'), player.x,player.y) 
     
@@ -160,6 +163,8 @@ class TileMap:
                 self.yadvanceVelocity += -self.scrollVelocity
             elif evt.key == pygame.K_o and self.overlord is not None:
                 self.overlordOn = True
+            elif evt.key == pygame.K_l:
+                self.loadMapFile(self.map_file)
             if self.overlord is not None and self.overlordOn is True:
                 self.overlord.handleKeyUp(evt)
                 

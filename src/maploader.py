@@ -7,7 +7,7 @@ class mapLoader_class:
             print "No map file name supplied with map_class"
             sys.exit()
             
-        self.map = utils.load_map('level1_col.lvl')
+        self.map = utils.load_map(map_file+'_col.lvl')
         self.height = len(self.map)-1
         self.width = len(self.map[0])-1
 

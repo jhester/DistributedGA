@@ -155,6 +155,5 @@ class OverlordSprite(pygame.sprite.Sprite):
         #screen.blit(self.image, (screenOffset[0]+xvpCoordinate - (startXTile * tileHeight), screenOffset[1]+yvpCoordinate - (startYTile * tileHeight)))
         #screen.blit(self.image, screenOffset, (xvpCoordinate - (startXTile * tileHeight), yvpCoordinate - (startYTile * tileHeight)) + vpDimensions)
         screen.blit(self.image, start)
-        print start
         #screen.blit(self.image, self.rect.topleft)
         
