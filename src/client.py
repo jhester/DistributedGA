@@ -208,7 +208,7 @@ class client_class:
         elif lastPos[1] == self.y+1:
             return 2
         else:
-            os.stderr.write("Pathfinding error 2")
+            sys.stderr.write("Pathfinding error 1")
             sys.exit()                
 
     #store data about ourself from server
@@ -262,7 +262,7 @@ if __name__ == "__main__":
         sock.settimeout(10)
         print "Connected on "+str(host)+":"+str(port)
     except:
-        print "ERROR: Try to connect to server FAILED"
+        sys.stderr.write("ERROR: Try to connect to server FAILED")
         sys.exit()
 
     #send client code
