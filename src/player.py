@@ -125,7 +125,7 @@ class blockManager_class:
         
 #class to manage all players, creation/deletion etc
 class playerManager_class:
-    def __init__(self, map):
+    def __init__(self, map, gamemaster=None):
         self.deadlist = []
         self.playerlist = []
         self.map = map
@@ -133,6 +133,7 @@ class playerManager_class:
         self.blockManager = blockManager_class(map)
         self.running = threading.Event()
         self.running.set() #initially true for now
+        self.gamemaster = gamemaster
 
     def pause(self):
         self.running.clear()
@@ -213,6 +214,8 @@ class playerManager_class:
             if player.isDead():
                 print "Player ("+str(player.id)+") died!"
                 self.addPlayerToDeadList(player)
+                if not self.gamemaster == None:
+                    self.gamemaster.playerDied()
 
     #a list to keep track of dead players
     def addPlayerToDeadList(self, player):
