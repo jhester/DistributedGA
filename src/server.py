@@ -156,9 +156,9 @@ class playerConnectionHandler(threading.Thread):
         global playermanager
         playermanager.attack(self.player)
         
-    def trySend(self, str):
+    def trySend(self, s):
         try:
-            self.conn.sendall(str)
+            self.conn.sendall(s)
         except:
             print "\033[33mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
             playermanager.removePlayer(self.player)
@@ -178,7 +178,7 @@ class observerConnectionHandler(threading.Thread):
         self.conn.send(str(maplvl))
         
         while 1:
-            time.sleep(0.1)
+            time.sleep(0.25)
             #send player id/positions
             try:
                 self.conn.send(playermanager.packSmall())
@@ -238,7 +238,8 @@ class gameMaster(threading.Thread):
     def modeMain(self):
         if self.roundIsValid():
             print "\033[32mGameMaster: Round started\033[37m"
-        
+
+        self.roundWon = False
         while self.roundIsValid():
             #prevent players from moving while we do damage
             time.sleep(0.5)
@@ -252,11 +253,17 @@ class gameMaster(threading.Thread):
             self.playermanager.resume()
 
             #check for round win
-            if self.playermanager.getPlayingCount() < self.winCount:
-                print "\033[32mGameMaster: End count ("+str(self.winCount)+") reached, starting new game!\033[37m"
-                self.AImanager.empty()
-                self.AImanager.set(self.playermanager.getLiveList())
-                return #exit main mode, game is won
+            if self.roundWon:
+                return
+
+    #check for win conditions
+    def playerDied(self):
+        if self.playermanager.getPlayingCount() < self.winCount:
+            print "\033[32mGameMaster: End count ("+str(self.winCount)+") reached, starting new game!\033[37m"
+            self.AImanager.empty()
+            self.AImanager.set(self.playermanager.getLiveList())
+            self.roundWon = True
+                                                                        
 
     #function to check if the current round is vail (enough players etc)
     def roundIsValid(self):
@@ -277,10 +284,10 @@ if __name__ == "__main__":
     playerthreadlist = []
     heartbeatDelay = 5
 
-    #startup the game master
     gamemaster = gameMaster(playermanager, playerthreadlist)
+    playermanager.gamemaster = gamemaster
     gamemaster.start()
-
+    
     #initlize socket
     HOST = ''
     PORT = int(sys.argv[1])
