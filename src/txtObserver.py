@@ -24,7 +24,7 @@ def getDataFromSocket(sck):
         line = ""
         try:
             line = sck.recv(1024)
-        except socket.timeout:
+        except:
             break
         
         if line == "":
