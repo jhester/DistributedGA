@@ -273,13 +273,13 @@ class gameMaster(threading.Thread):
     
 if __name__ == "__main__":
     #make sure we didn't forget any commandline arguments
-    if len(sys.argv) < 2:
-        print "\033[31mERROR: Usage python server.py <port>\033[37m"
+    if len(sys.argv) < 3:
+        print "\033[31mERROR: Usage python server.py <port> <map level number>\033[37m"
         sys.exit()
     
     #initlize variables
-    maplvl = 1
-    map = mapLoader_class('level'+str(maplvl)+'_col.lvl')
+    maplvl = sys.argv[2]
+    map = mapLoader_class('level'+str(maplvl))
     playermanager = playerManager_class(map)
     playerthreadlist = []
     heartbeatDelay = 5
