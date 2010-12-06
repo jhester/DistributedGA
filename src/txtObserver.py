@@ -53,7 +53,7 @@ s.send(str(constant_class.observercode))
 
 #recv map level
 maplvl = s.recv(64)
-map = mapLoader_class("level"+maplvl+"_layer1.txt")
+map = mapLoader_class("level"+maplvl)
 
 #setup playermanager
 playermanager = playerManager_class(map)
