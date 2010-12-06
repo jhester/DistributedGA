@@ -212,7 +212,6 @@ class playerManager_class:
         if not player.isDead() and player.isPlaying:
             player.health -= 1
             if player.isDead():
-                print "Player ("+str(player.id)+") died!"
                 self.addPlayerToDeadList(player)
                 if not self.gamemaster == None:
                     self.gamemaster.playerDied()
