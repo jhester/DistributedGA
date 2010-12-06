@@ -274,6 +274,7 @@ class client_class:
     #if a spawn packet is recieved
     def modeSpawn(self,vars):
         self.AI.set(vars)
+        self.conn.send("4")
 
 if __name__ == "__main__":  
     #don't be hatin
@@ -308,15 +309,23 @@ if __name__ == "__main__":
     #main loop
     while 1:
         #recieve and process packet
-        (pk_code, data) = pickle.loads(getDataFromSocket(sock))
-        #(pk_code, data) = pickle.loads(sock.recv(6144))
+        receved = False
 
-        #these modes process the data and respond to the server accordingly
-        if pk_code == constant_class.packet_main:
-            client.modeMain(data)
-        elif pk_code == constant_class.packet_heartbeat:
-            client.modeHeartbeat(data)
-        elif pk_code == constant_class.packet_spawn:
-            client.modeSpawn(data)
+        try:
+            (pk_code, data) = pickle.loads(getDataFromSocket(sock))
+            receved = True
+        except:
+            pass
+
+        if receved:            
+            #these modes process the data and respond to the server accordingly
+            if pk_code == constant_class.packet_main:
+                client.modeMain(data)
+            elif pk_code == constant_class.packet_heartbeat:
+                client.modeHeartbeat(data)
+            elif pk_code == constant_class.packet_spawn:
+                client.modeSpawn(data)
+        else:
+            sock.send(str(constant_class.packet_err))
                                                                    
     sock.close()
