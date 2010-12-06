@@ -68,7 +68,6 @@ class playerConnectionHandler(threading.Thread):
         if not self.runState == constant_class.game_wait:
             return
         
-        print "Thread ("+str(self.id)+") with player ("+str(self.player.id)+") enterting heatbeat mode"
         self.player.isPlaying = False
         
         while self.runState == constant_class.game_wait:
@@ -76,19 +75,14 @@ class playerConnectionHandler(threading.Thread):
             self.trySend(pickle.dumps((constant_class.packet_heartbeat, heartbeatDelay)))
         
             try:
-                pk_code = int(self.conn.recv(1024))
+                pk_code = int(self.conn.recv(1024)[0])
             except:
-                print "\033[33mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
+                print "\033[33mClient lost conn, heartbeat\033[37m"
                 playermanager.removePlayer(self.player)
                 sys.exit()
             
-            #client should be sending heartbeat back
-            if not pk_code == constant_class.packet_heartbeat:
-                print "\033[31mError: client not in same mode as server!\033[37m"
-            
             #wait until next heartbeat
             time.sleep(heartbeatDelay)
-
 
     def modeMain(self):
         global playermanager
@@ -97,7 +91,6 @@ class playerConnectionHandler(threading.Thread):
         if not self.runState == constant_class.game_main:
             return
         
-        print "Thread ("+str(self.id)+") with player ("+str(self.player.id)+") enterting main mode"
         self.player.isPlaying = True
 
         #stay in this mode as long as we are alive
@@ -107,11 +100,16 @@ class playerConnectionHandler(threading.Thread):
             
             #we should be reciving a direction
             try:
-                self.data = int(self.conn.recv(1024))
+                self.data = int(self.conn.recv(1024)[0])
             except:
-                print "\033[33mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
+                #if we recved nothing then int will fail
+                print "\033[33mClient lost conn, main\033[37m"
                 playermanager.removePlayer(self.player)
                 sys.exit()
+                
+            #if the client had an error assume they aren't going to move
+            if self.data == constant_class.packet_err:
+                self.data = 4
 
             #move the player
             playermanager.movePlayerDir(self.player, self.data)            
@@ -127,7 +125,10 @@ class playerConnectionHandler(threading.Thread):
 
         #send the players current AI
         self.trySend(pickle.dumps((constant_class.packet_spawn,self.player.getAI())))
-        self.runState = constant_class.game_main
+
+        #client recved AI
+        if not self.conn.recv(64)[0] == str(constant_class.packet_err):
+            self.runState = constant_class.game_main
 
     #respawn our player
     def respawn(self, AImanager):
@@ -160,7 +161,7 @@ class playerConnectionHandler(threading.Thread):
         try:
             self.conn.sendall(s)
         except:
-            print "\033[33mPlayerThread lost connection self.id="+str(self.id)+" player.id="+str(self.player.id)+"\033[37m"
+            print "\033[33mClient lost conn, trySend\033[37m"
             playermanager.removePlayer(self.player)
             sys.exit()
                                                 
