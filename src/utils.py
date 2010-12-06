@@ -47,7 +47,8 @@ def load_map(map_file):
         try:
             tileData1 = open(map_file).readlines()
         except:
-            sys.stderr.write("Could not open map_file: " + map_file)
+            sys.stderr.write("Could not open map_file: " + map_file + "\n")
+            sys.exit()
 
     # strip off all the newlines in the strings in tileData1
     tileData1 = [line.rstrip() for line in tileData1]
