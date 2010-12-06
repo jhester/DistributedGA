@@ -83,10 +83,10 @@ class client_class:
     #this is based on distance, campers don't like to move
     def camperAttackPcnt(self, other):
         dist = getDist(self.x,self.y,other.x,other.y)
-        if dist > 15: #15+ is all really far
-            dist = 15
+        if dist > 10: #10+ is all really far
+            dist = 10
 
-        distPcnt = dist/15.0
+        distPcnt = dist/10.0
         distPcnt = 1-distPcnt
         camperPcnt = self.AI.camper/100.0
         attackPcnt = camperPcnt-distPcnt
@@ -244,7 +244,7 @@ class client_class:
     #store data about ourself from server
     def loadData(self, vars):
         (self.x, self.y, self.health) = vars
-        
+
     #if a main packet is recieved
     def modeMain(self, (vars, localplayers)):
         #store data about ourself
@@ -254,7 +254,9 @@ class client_class:
         localplayers = pickle.loads(localplayers)
         others = []
         for player in localplayers:
-            others.append(target_class(player))
+            other = target_class(player)
+            if getDist(self.x,self.y,other.x,other.y) <= 15:
+                others.append(other)
 
         #determine best player to attack
         target = self.getBestTarget(others)
