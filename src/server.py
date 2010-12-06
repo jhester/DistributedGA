@@ -178,7 +178,7 @@ class observerConnectionHandler(threading.Thread):
         self.conn.send(str(maplvl))
         
         while 1:
-            time.sleep(0.25)
+            time.sleep(0.1)
             #send player id/positions
             try:
                 self.conn.send(playermanager.packSmall())
@@ -196,9 +196,9 @@ class gameMaster(threading.Thread):
         self.playerthreadlist = playerthreadlist
         self.AImanager = AIManager_class()
         
-        self.startCount = 20 #number of players required to start round
-        self.minCount = 10 #min number of connected players (dead or alive) for valid round
-        self.winCount = 10 #number of players alive to end round
+        self.startCount = 40 #number of players required to start round
+        self.minCount = 20 #min number of connected players (dead or alive) for valid round
+        self.winCount = 20 #number of players alive to end round
 
     def run(self):
         while 1:
