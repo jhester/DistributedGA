@@ -20,6 +20,36 @@ def getDist(x1,y1,x2,y2):
     d = math.sqrt(x*x + y*y)
     return d
 
+#nifty bit of code to read all data from a socket
+#taken from the website...
+#http://appi101.wordpress.com/2007/12/01/recv-over-sockets-in-python/
+def getDataFromSocket(sck):
+    data = ""
+    sck.settimeout(None)
+
+    data = sck.recv(6144)
+    return data
+
+    sck.settimeout(0.5)
+    
+    while 1:
+        line = ""
+        try:
+            line = sck.recv(1024)
+        except:
+            break
+        
+        if line == "":
+            break
+        
+        data += line
+
+    if data == "":
+        sys.stderr.write("No data recieved\n")
+        sys.exit()
+        
+    return data
+    
 #a class to keep info on other players
 class target_class:
     def __init__(self, vars):
@@ -259,7 +289,7 @@ if __name__ == "__main__":
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((host,port))
-        sock.settimeout(10)
+        #sock.settimeout(10)
         print "Connected on "+str(host)+":"+str(port)
     except:
         sys.stderr.write("ERROR: Try to connect to server FAILED")
@@ -278,7 +308,8 @@ if __name__ == "__main__":
     #main loop
     while 1:
         #recieve and process packet
-        (pk_code, data) = pickle.loads(sock.recv(6144))
+        (pk_code, data) = pickle.loads(getDataFromSocket(sock))
+        #(pk_code, data) = pickle.loads(sock.recv(6144))
 
         #these modes process the data and respond to the server accordingly
         if pk_code == constant_class.packet_main:
