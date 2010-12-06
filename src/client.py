@@ -300,7 +300,7 @@ if __name__ == "__main__":
 
     #recieve and load map lvl
     maplvl = sock.recv(64)
-    map = mapLoader_class('level'+maplvl+'_col.lvl')
+    map = mapLoader_class('level'+maplvl)
 
     #create a client
     client = client_class(map, sock)
