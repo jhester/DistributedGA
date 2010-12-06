@@ -60,14 +60,18 @@ class TileMap:
         self.box = utils.load_image('box.png')
         self.box2 = utils.load_image('box2.png')
         self.ratio = self.minimap.get_height()/self.map_size
+        
+        # Generate the mini-map background image
+        
 
     def loadMapFile(self, map_file):
+        # Load the tile images
         for infile in glob.glob( os.path.join('../data/images/tiles', '*.*') ):
             self.tiles[infile[len(infile)-5]] = pygame.image.load(infile).convert_alpha()   
         
-        # Load the sprites
-        self.map_sprites = [pygame.image.load('../data/images/sprites/sprite%d.png' % n).convert_alpha() for n in range(4)]
-        self.map_sprites_rd = [53, 0, 128, 128]
+        # Load the sprite images
+        self.map_sprites = [pygame.image.load('../data/images/sprites/sprite%d.png' % n).convert_alpha() for n in range(6)]
+        self.map_sprites_rd = [53, 0, 128, 128, 0, 0]
         self.map_sprites_list = []
         self.tileWidth, self.tileHeight = self.tiles['0'].get_size()
         

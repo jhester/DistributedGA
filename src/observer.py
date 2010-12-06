@@ -35,6 +35,7 @@ s.send(str(constant_class.observercode))
 #Setup pygame
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption('DIstributed Genetic Algorithm (DIGA) - Observer')
 
 #recv map level
 maplvl = s.recv(64).strip()[0]

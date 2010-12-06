@@ -13,6 +13,7 @@ if len(sys.argv) is not 2:
 # Setup pygame
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption('DIstributed Genetic Algorithm (DIGA) - Map Viewer')
 
 # Map scene
 mapscene = TileMap.TileMap('level'+sys.argv[1])
