@@ -6,10 +6,11 @@ input=client.py
 arguments=gecko1.cs.clemson.edu 5555
 
 MAPDIR = ../data/maps
-MAPFILES = $(MAPDIR)/level1_col.lvl
-MAPFILES = $(MAPFILES),$(MAPDIR)/level2_col.lvl
-MAPFILES = $(MAPFILES),$(MAPDIR)/level3_col.lvl
-MAPFILES = $(MAPFILES),$(MAPDIR)/level4_col.lvl
+MAP1 = $(MAPDIR)/level1_col.lvl
+MAP2 = $(MAPDIR)/level2_col.lvl
+MAP3 = $(MAPDIR)/level3_col.lvl
+MAP4 = $(MAPDIR)/level4_col.lvl
+MAPFILES = $(MAP1), $(MAP2), $(MAP3), $(MAP4)
 PYFILES = constant.py, maploader.py, player.py, utils.py
 transfer_input_files = $(PYFILES), $(MAPFILES)
 
