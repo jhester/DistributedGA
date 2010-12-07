@@ -15,6 +15,29 @@ from constant import constant_class
 from maploader import mapLoader_class
 from player import *
 
+#nifty bit of code to read all data from a socket
+#taken from the website...
+#http://appi101.wordpress.com/2007/12/01/recv-over-sockets-in-python/
+def getDataFromSocket(sck):
+    data = ""
+    sck.settimeout(None)
+    data = sck.recv(1024)
+    sck.settimeout(0.1)
+
+    while 1:
+        line = ""
+        try:
+            line = sck.recv(1024)
+        except:
+            break
+        
+        if line == "":
+            break
+        
+        data += line
+    return data
+                                                                                
+
 #don't be hatin
 if not len(sys.argv) == 3:
     print "Usage python observer.py <host> <port>"
@@ -55,7 +78,7 @@ time = 0
 running = True
 while running:
     #recv player id/position
-    data = s.recv(4048).strip()
+    data = getDataFromSocket(s)
     playermanager.loadSmall(data)
 
     # Update all the players on the map
