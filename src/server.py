@@ -55,7 +55,7 @@ class playerConnectionHandler(threading.Thread):
         #send maplvl
         self.trySend(str(maplvl))
         
-        # Block till we get the response back
+        #Block till we get the response back
         data = int(self.conn.recv(1024))
         if data != constant_class.clientcode:
             print "\033[32mClient Disconnected\033[37m" 
@@ -145,17 +145,6 @@ class playerConnectionHandler(threading.Thread):
         if not self.conn.recv(64)[0] == str(constant_class.packet_err):
             self.runState = constant_class.game_main
 
-    #respawn our player
-    def respawn(self, AImanager):
-        #don't try to respawn if we don't have a player
-        if self.player == None:
-            return
-
-        global playermanager
-        playermanager.respawn(self.player)
-        self.player.setAI(AImanager.get())
-        self.runState = constant_class.game_spawn
-
     #getter for id
     def getId(self):
         return self.id
@@ -164,14 +153,6 @@ class playerConnectionHandler(threading.Thread):
     def getPlayerPos(self):
         return (self.player.x, self.player.y, self.player.health)
 
-    #attack all players on the same tile
-    def doDamage(self):
-        if self.player == None:
-            return
-
-        global playermanager
-        playermanager.attack(self.player)
-        
     def trySend(self, s):
         try:
             self.conn.sendall(s)
@@ -227,9 +208,9 @@ class gameMaster(threading.Thread):
         self.playerthreadlist = playerthreadlist
         self.AImanager = AIManager_class()
         
-        self.startCount = 4 #number of players required to start round
-        self.minCount = 1 #min number of connected players (dead or alive) for valid round
-        self.winCount = -1 #number of players alive to end round
+        self.startCount = 10 #number of players required to start round
+        self.minCount = 5 #min number of connected players (dead or alive) for valid round
+        self.winCount = 5 #number of players alive to end round
 
     def run(self):
         while 1:
@@ -247,6 +228,7 @@ class gameMaster(threading.Thread):
         print "\033[32mGameMaster: Not enough players connected\033[37m"
         for thread in self.playerthreadlist:
             thread.runState = constant_class.game_wait
+
         while len(self.playermanager.getPlayerList()) < self.startCount:
             time.sleep(5)
 
@@ -258,43 +240,22 @@ class gameMaster(threading.Thread):
         print "\033[32mGameMaster: Spawning players\033[37m"
         
         #respawn all players
-        self.playermanager.emptyDeadList()
-        for thread in self.playerthreadlist:
-            thread.respawn(self.AImanager)
-
-        #wait until atleast the minimum # of players have spawned
-        while self.playermanager.getPlayingCount() < self.minCount:
-            time.sleep(1)
+        self.playermanager.respawnPlayers()
                                         
     def modeMain(self):
         if self.roundIsValid():
             print "\033[32mGameMaster: Round started\033[37m"
 
-        self.roundWon = False
         while self.roundIsValid():
             #prevent players from moving while we do damage
-            time.sleep(0.5)
-            self.playermanager.pause()
-            
-            #tell all threads to 'attack'
-            for thread in self.playerthreadlist:
-                thread.doDamage()
-            
-            #allow movement again
-            self.playermanager.resume()
+            time.sleep(constant_class.game_speed)
+            self.playermanager.attackPlayers()
 
             #check for round win
-            if self.roundWon:
+            if self.playermanager.getPlayingCount() < self.winCount:
+                print "\033[32mGameMaster: End count ("+str(self.winCount)+") reached, starting new game!\033[37m"
+                self.AImanager.set(self.playermanager.getLiveList())
                 return
-
-    #check for win conditions
-    def playerDied(self):
-        if self.playermanager.getPlayingCount() < self.winCount:
-            print "\033[32mGameMaster: End count ("+str(self.winCount)+") reached, starting new game!\033[37m"
-            self.AImanager.empty()
-            self.AImanager.set(self.playermanager.getLiveList())
-            self.roundWon = True
-                                                                        
 
     #function to check if the current round is vail (enough players etc)
     def roundIsValid(self):
