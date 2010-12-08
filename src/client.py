@@ -5,6 +5,7 @@ import random
 import time
 import pickle
 import math
+import utils
 from collections import deque
 
 from constant import *
@@ -19,36 +20,6 @@ def getDist(x1,y1,x2,y2):
     y = y1-y2
     d = math.sqrt(x*x + y*y)
     return d
-
-#nifty bit of code to read all data from a socket
-#taken from the website...
-#http://appi101.wordpress.com/2007/12/01/recv-over-sockets-in-python/
-def getDataFromSocket(sck):
-    data = ""
-    sck.settimeout(None)
-
-    data = sck.recv(6144)
-    return data
-
-    sck.settimeout(0.5)
-    
-    while 1:
-        line = ""
-        try:
-            line = sck.recv(1024)
-        except:
-            break
-        
-        if line == "":
-            break
-        
-        data += line
-
-    if data == "":
-        sys.stderr.write("No data recieved\n")
-        sys.exit()
-        
-    return data
     
 #a class to keep info on other players
 class target_class:
@@ -302,8 +273,12 @@ if __name__ == "__main__":
     sock.send(str(constant_class.clientcode))
 
     #recieve and load map lvl
-    maplvl = sock.recv(64)
+    maplvl = sock.recv(64).strip()[0]
+    print maplvl
     map = mapLoader_class('level'+maplvl)
+
+    # Confirm reception
+    sock.send(str(constant_class.clientcode))
 
     #create a client
     client = client_class(map, sock)
@@ -314,7 +289,7 @@ if __name__ == "__main__":
         receved = False
 
         try:
-            (pk_code, data) = pickle.loads(getDataFromSocket(sock))
+            (pk_code, data) = pickle.loads(utils.getDataFromSocket(sock))
             receved = True
         except:
             pass
