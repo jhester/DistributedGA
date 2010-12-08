@@ -178,11 +178,26 @@ class observerConnectionHandler(threading.Thread):
         #send the map
         self.conn.send(str(maplvl))
         
+        # Block till we get the response back
+        data = int(self.conn.recv(1024))
+        if data != constant_class.observercode:
+            print "Observer Disconnected" 
+            sys.exit()
+        print "Observer communicating with GameMaster. Starting\n\n"
+            
         while 1:
-            time.sleep(0.1)
             #send player id/positions
             try:
                 self.conn.send(playermanager.packSmall())
+
+                # Now we need to block until we get a response saying the observer
+                # has done everything it needs to do
+                # Block till we get the response back
+                data = int(self.conn.recv(1024))
+                if data != constant_class.observercode:
+                    print "Observer Disconnected" 
+                    sys.exit()
+                
             except:
                 print "Observer disconnected"
                 return
@@ -197,9 +212,9 @@ class gameMaster(threading.Thread):
         self.playerthreadlist = playerthreadlist
         self.AImanager = AIManager_class()
         
-        self.startCount = 40 #number of players required to start round
-        self.minCount = 20 #min number of connected players (dead or alive) for valid round
-        self.winCount = 20 #number of players alive to end round
+        self.startCount = 2 #number of players required to start round
+        self.minCount = 1 #min number of connected players (dead or alive) for valid round
+        self.winCount = -1 #number of players alive to end round
 
     def run(self):
         while 1:
