@@ -25,3 +25,6 @@ class constant_class:
 	game_wait = 0
 	game_main = 1
 	game_spawn = 2
+
+	#gamemaster
+	game_speed = 1.5
