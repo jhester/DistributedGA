@@ -96,26 +96,27 @@ class TileMap:
     
     def turnOverlordOn(self, truefalse):
         self.overlordOn = truefalse
-          
+    
+    def isPlayerAttacking(self, player):
+        p1 = self.players[player.id]
+        list = self.players.keys()
+        for key in list:
+            p2 = self.players[key]
+            if not p2 == p1 and not p2.dead:
+                if p2.tileX == p1.tileX and p2.tileY == p1.tileY:
+                        return True
+        return False
+    
     def updatePlayer(self, player):
         if self.players.has_key(player.id):
-            # Check to see if player is attacking or finished attacking
-            p1 = self.players[player.id]
-            list = self.players.keys()
-            for key in list:
-                p2 = self.players[key]
-                if not p2 == p1 and not p2.dead and not p1.dead:
-                    if p2.tileX == p1.tileX and p2.tileY == p1.tileY:
-                        p1.attack()
-                    else:
-                        # Make sure were not attacking, now move on
-                        self.players[player.id].gotoTile(player.x, player.y)
-                                    
             # Check to see if were dying 
             if player.health <= 0:
                 self.players[player.id].die()
+            elif self.isPlayerAttacking(player):
+                self.players[player.id].attack()
             else:
                 self.players[player.id].gotoTile(player.x, player.y)
+                                    
         else:
             self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zelda_move.png'), player.x,player.y) 
             # Add the death and attacking images
@@ -212,7 +213,6 @@ class TileMap:
         for key in self.players.keys():
             list.append(self.players[key])
         for player in list:
-            if self.inView(player.tileX, player.tileY):
                 player.update(self.time, screen, self.xvpCoordinate, self.yvpCoordinate, self.vpRenderOffset, self.tileWidth, self.vpDimensions)
        
         # Update overlord if applicable, make sure of collisions

@@ -70,4 +70,33 @@ def load_char_map(map_file):
     tileData1 = [line.rstrip() for line in tileData1]
     tileData1 = [[c for c in s] for s in tileData1]
     return tileData1
+
+#nifty bit of code to read all data from a socket
+#taken from the website...
+#http://appi101.wordpress.com/2007/12/01/recv-over-sockets-in-python/
+def getDataFromSocket(sck):
+    data = ""
+    sck.settimeout(None)
+
+    data = sck.recv(6144)
+    return data
+
+    sck.settimeout(0.5)
+    
+    while 1:
+        line = ""
+        try:
+            line = sck.recv(1024)
+        except:
+            break
         
+        if line == "":
+            break
+        
+        data += line
+
+    if data == "":
+        sys.stderr.write("No data recieved\n")
+        sys.exit()
+        
+    return data

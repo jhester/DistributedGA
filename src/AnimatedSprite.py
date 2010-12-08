@@ -4,14 +4,14 @@ import math
 
 class AnimatedSprite(pygame.sprite.Sprite):
     
-    def __init__(self, images, tileX, tileY, start_direction = 0, frames_per_direction = 3, fps = 4, map = None):
+    def __init__(self, images, tileX, tileY, start_direction=0, frames_per_direction=3, fps=4, map=None):
         pygame.sprite.Sprite.__init__(self)
         self._images = images
         #Animations: 0-up  1-right 2-down 3-left
-        self.UP=0
-        self.RIGHT=1
-        self.DOWN=2
-        self.LEFT=3
+        self.UP = 0
+        self.RIGHT = 1
+        self.DOWN = 2
+        self.LEFT = 3
         
         # Track the time we started, and the time between updates.
         # Then we can figure out when we have to switch the image.
@@ -28,7 +28,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.tileY = tileY
         self.lastTileY = tileY
         self.moving = False
-        self.rect = pygame.Rect(tileX*32, tileY*32, 32, 32)
+        self.rect = pygame.Rect(tileX * 32, tileY * 32, 32, 32)
         
         # Status booleans
         self.dead = False
@@ -38,7 +38,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.map = map
         
         # Set our first image.
-        self._frame = self.direction*self.frames_per_direction
+        self._frame = self.direction * self.frames_per_direction
         self.image = self._images[self._frame]
 
     def addDeathImages(self, images):
@@ -49,13 +49,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
             
     def goDirection(self, direction):
         if direction == self.UP:
-            self.gotoTile(self.tileX, self.tileY-1)
+            self.gotoTile(self.tileX, self.tileY - 1)
         if direction == self.DOWN:
-            self.gotoTile(self.tileX, self.tileY+1)
+            self.gotoTile(self.tileX, self.tileY + 1)
         if direction == self.LEFT:
-            self.gotoTile(self.tileX-1, self.tileY)
+            self.gotoTile(self.tileX - 1, self.tileY)
         if direction == self.RIGHT:
-            self.gotoTile(self.tileX+1, self.tileY)
+            self.gotoTile(self.tileX + 1, self.tileY)
     
     def gotoTile(self, tileX, tileY):
         # Only move if were not already moving.
@@ -114,43 +114,45 @@ class AnimatedSprite(pygame.sprite.Sprite):
         # So we know were in the view, now calculate where we are if were moving
         startXTile = math.floor(float(xvpCoordinate) / tileHeight)
         startYTile = math.floor(float(yvpCoordinate) / tileHeight)
-        xdiff = xvpCoordinate-startXTile*tileHeight
-        ydiff = yvpCoordinate-startYTile*tileHeight
+        xdiff = xvpCoordinate - startXTile * tileHeight
+        ydiff = yvpCoordinate - startYTile * tileHeight
             
-        start = (screenOffset[0]-xdiff+(self.lastTileX-startXTile)*32,screenOffset[1]-ydiff+(self.lastTileY-startYTile)*32)
+        start = (screenOffset[0] - xdiff + (self.lastTileX - startXTile) * 32, screenOffset[1] - ydiff + (self.lastTileY - startYTile) * 32)
 
-        if self.dead:
-                screen.blit(self.image, start)
-        elif self.attacking:  
-            screen.blit(self.image, start)
-            print 'attacking'
-        else:
-            # Animate
-            if self.directionChanged is True:
-                self._frame = self.direction*self.frames_per_direction
-                self.directionChanged = False
-                self.image = self._images[self._frame]
+        # Animate direction changes first
+        if self.directionChanged is True:
+            self._frame = self.direction * self.frames_per_direction
+            self.directionChanged = False
+            self.image = self._images[self._frame]
+        
+        # Animate moving by direction
+        if self.moving is True and t - self._last_update > self._delay:
+            self._frame += 1
+            if self._frame >= len(self._images) / 4 + self.direction * self.frames_per_direction: self._frame = self.direction * self.frames_per_direction
+            self.image = self._images[self._frame]
+            self._last_update = t
+        # Animate attacking
+        elif  self.attacking is True and t - self._last_update > self._delay:
+            #Setup attacking animation
+            self._frame += 1
+            if self._frame >= len(self._images): self._frame = 0
+            self.image = self._images[self._frame]
+            self._last_update = t
                 
-            if self.moving is True and t - self._last_update > self._delay:
-                self._frame += 1
-                if self._frame >= len(self._images) / 4 + self.direction*self.frames_per_direction: self._frame = self.direction*self.frames_per_direction
-                self.image = self._images[self._frame]
-                self._last_update = t
-                
-            xdstep=0
-            ydstep=0
+            xdstep = 0
+            ydstep = 0
             
-            end = (screenOffset[0]-xdiff+(self.tileX-startXTile)*32,screenOffset[1]-ydiff+(self.tileY-startYTile)*32)
+            end = (screenOffset[0] - xdiff + (self.tileX - startXTile) * 32, screenOffset[1] - ydiff + (self.tileY - startYTile) * 32)
                 
             # Calculate where we moving to and where we coming from
             #if self.lastTileX != self.tileX or self.lastTileY != self.tileY: 
             if self.step != self.velocity:
-                self.step+=1
-                xdstep = (end[0]-start[0]) / self.velocity
-                ydstep = (end[1]-start[1]) / self.velocity
-                start = (start[0]+xdstep*self.step,start[1]+ydstep*self.step)
+                self.step += 1
+                xdstep = (end[0] - start[0]) / self.velocity
+                ydstep = (end[1] - start[1]) / self.velocity
+                start = (start[0] + xdstep * self.step, start[1] + ydstep * self.step)
             else:
-                self.step=0  
+                self.step = 0  
                 self.moving = False
                 self.lastTileX = self.tileX
                 self.lastTileY = self.tileY
