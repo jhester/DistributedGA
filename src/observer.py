@@ -13,30 +13,7 @@ import OverlordSprite
 import utils
 from constant import constant_class
 from maploader import mapLoader_class
-from player import *
-
-#nifty bit of code to read all data from a socket
-#taken from the website...
-#http://appi101.wordpress.com/2007/12/01/recv-over-sockets-in-python/
-def getDataFromSocket(sck):
-    data = ""
-    sck.settimeout(None)
-    data = sck.recv(1024)
-    sck.settimeout(0.1)
-
-    while 1:
-        line = ""
-        try:
-            line = sck.recv(1024)
-        except:
-            break
-        
-        if line == "":
-            break
-        
-        data += line
-    return data
-                                                                                
+from player import *                                                            
 
 #don't be hatin
 if not len(sys.argv) == 3:
@@ -66,6 +43,9 @@ print maplvl
 map = mapLoader_class('level'+maplvl)
 mapscene = TileMap.TileMap("level"+maplvl)
 
+# Confirm reception
+s.send(str(constant_class.observercode))
+
 #setup playermanager
 playermanager = playerManager_class(map)
 
@@ -78,12 +58,13 @@ time = 0
 running = True
 while running:
     #recv player id/position
-    data = getDataFromSocket(s)
+    data = utils.getDataFromSocket(s)
     playermanager.loadSmall(data)
 
     # Update all the players on the map
     # This will add players if they havent been added
     players = playermanager.getPlayerList()
+    
     for player in players:
         mapscene.updatePlayer(player)
       
@@ -93,6 +74,10 @@ while running:
             running = False
         mapscene.update(screen, evt)
     
+    # Now inform the server that we are ready for more data
+    s.send(str(constant_class.observercode))
+    
+    # Flip the display buffer
     pygame.display.flip()
         
 s.close()
