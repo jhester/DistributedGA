@@ -34,7 +34,7 @@ s.send(str(constant_class.observercode))
 
 #Setup pygame
 pygame.init()
-screen = pygame.display.set_mode((800, 600))
+screen = pygame.display.set_mode((1000, 600))
 pygame.display.set_caption('DIstributed Genetic Algorithm (DIGA) - Observer')
 
 #recv map level
@@ -74,10 +74,10 @@ while running:
             running = False
         mapscene.update(screen, evt)
     
-    # Now inform the server that we are ready for more data
-    s.send(str(constant_class.observercode))
-    
     # Flip the display buffer
     pygame.display.flip()
+    
+    # Now inform the server that we are ready for more data
+    s.send(str(constant_class.observercode))
         
 s.close()

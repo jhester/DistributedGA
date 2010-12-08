@@ -302,6 +302,10 @@ if __name__ == "__main__":
                 client.modeHeartbeat(data)
             elif pk_code == constant_class.packet_spawn:
                 client.modeSpawn(data)
+                
+            # Now inform the server that we are ready for more data
+            sock.send(str(constant_class.clientcode))
+             
         else:
             sock.send(str(constant_class.packet_err))
                                                                    

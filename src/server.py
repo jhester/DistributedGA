@@ -54,12 +54,27 @@ class playerConnectionHandler(threading.Thread):
 
         #send maplvl
         self.trySend(str(maplvl))
-
+        
+        # Block till we get the response back
+        data = int(self.conn.recv(1024))
+        if data != constant_class.clientcode:
+            print "\033[32mClient Disconnected\033[37m" 
+            sys.exit()
+        print "\033[32mClient communicating with GameMaster. Waiting\n\n\033[37m"
+        
         #This is just a basic frame work simmilar to end product
         while 1:
             self.modeHeartbeat()
             self.modeSpawn()
-            self.modeMain()            
+            self.modeMain()      
+            
+            # Now we need to block until we get a response saying the observer
+            # has done everything it needs to do
+            # Block till we get the response back
+            data = int(self.conn.recv(1024))
+            if data != constant_class.clientcode:
+                print "\033[32mClient Disconnected\033[37m" 
+                sys.exit()      
 
     def modeHeartbeat(self):
         global heartbeatDelay
@@ -181,9 +196,9 @@ class observerConnectionHandler(threading.Thread):
         # Block till we get the response back
         data = int(self.conn.recv(1024))
         if data != constant_class.observercode:
-            print "Observer Disconnected" 
+            print "\033[32mObserver Disconnected\033[37m" 
             sys.exit()
-        print "Observer communicating with GameMaster. Starting\n\n"
+        print "\033[32mObserver communicating with GameMaster. Starting\n\n\033[37m"
             
         while 1:
             #send player id/positions
@@ -195,11 +210,11 @@ class observerConnectionHandler(threading.Thread):
                 # Block till we get the response back
                 data = int(self.conn.recv(1024))
                 if data != constant_class.observercode:
-                    print "Observer Disconnected" 
+                    print "\033[32mObserver Disconnected\033[37m" 
                     sys.exit()
                 
             except:
-                print "Observer disconnected"
+                print "\033[32mObserver disconnected\033[37m"
                 return
 
 #responcible for the game as a whole
@@ -212,9 +227,9 @@ class gameMaster(threading.Thread):
         self.playerthreadlist = playerthreadlist
         self.AImanager = AIManager_class()
         
-        self.startCount = 40 #number of players required to start round
-        self.minCount = 20 #min number of connected players (dead or alive) for valid round
-        self.winCount = 20 #number of players alive to end round
+        self.startCount = 4 #number of players required to start round
+        self.minCount = 1 #min number of connected players (dead or alive) for valid round
+        self.winCount = -1 #number of players alive to end round
 
     def run(self):
         while 1:
