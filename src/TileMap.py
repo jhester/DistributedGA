@@ -57,8 +57,10 @@ class TileMap:
         
         # Add the mini-map
         self.minimap = utils.load_image('minimap.png')
-        self.box = utils.load_image('box.png')
-        self.box2 = utils.load_image('box2.png')
+        self.movebx = utils.load_image('movebx.png')
+        self.deadbx = utils.load_image('deadbx.png')
+        self.atkbx = utils.load_image('atkbx.png')
+        self.ovbx = utils.load_image('ovbx.png')
         self.ratio = self.minimap.get_height()/self.map_size
         
         # Generate the mini-map background image
@@ -230,9 +232,15 @@ class TileMap:
         screen.blit(self.minimap,  (self.vpRenderOffset[0]+580,self.vpRenderOffset[1]+385))
         # Blit overlord
         if self.overlordOn is True:
-            screen.blit(self.box2, (self.vpRenderOffset[0]+580+self.overlord.tileX*self.ratio+4, self.vpRenderOffset[1]+385+self.overlord.tileY*self.ratio+4))
+            screen.blit(self.ovbx, (self.vpRenderOffset[0]+580+self.overlord.tileX*self.ratio+4, self.vpRenderOffset[1]+385+self.overlord.tileY*self.ratio+4))
         for player in list:
-            screen.blit(self.box, (self.vpRenderOffset[0]+580+player.tileX*self.ratio+4, self.vpRenderOffset[1]+385+player.tileY*self.ratio+4))
+            # Determine status
+            img = self.movebx
+            if player.attack is True:
+                img = self.atkbx
+            elif player.dead is True:
+                img = self.deadbx
+            screen.blit(img, (self.vpRenderOffset[0]+580+player.tileX*self.ratio+4, self.vpRenderOffset[1]+385+player.tileY*self.ratio+4))
         pygame.draw.rect(screen, (0,255,255), (self.vpRenderOffset[0]+580+startXTile*self.ratio+4,self.vpRenderOffset[1]+385+startYTile*self.ratio+4,self.numXTiles*self.ratio,self.numYTiles*self.ratio-4), 1) 
         
         #screen.blit(surf, (self.vpRenderOffset[0]+426+player.tileX*ratio, self.vpRenderOffset[1]+264+player.tileY*ratio))

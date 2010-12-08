@@ -83,8 +83,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
             # Reset the step
             self.step = 0
             
-            
-        
     def handleKeyUp(self, evt):
         if evt.key == pygame.K_a:
             self.goDirection(self.LEFT)
@@ -106,9 +104,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
         # Die, no more movement, etc, just display dead person frame
         self.moving = False
         self.dead = True
+        self.attacking = False
+        self._images = self.death_images
         self.image = self.death_images[0]
-        
-        
             
     def update(self, t, screen, xvpCoordinate, yvpCoordinate, screenOffset, tileHeight, vpDimensions):
         # Note that this doesn't work if it's been more that self._delay
@@ -133,7 +131,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self._frame += 1
             if self._frame >= len(self._images) / 4 + self.direction * self.frames_per_direction: self._frame = self.direction * self.frames_per_direction
             self.image = self._images[self._frame]
-            self._last_update = t
+            #self._last_update = t
             
             xdstep = 0
             ydstep = 0
