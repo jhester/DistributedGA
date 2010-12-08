@@ -212,9 +212,9 @@ class gameMaster(threading.Thread):
         self.playerthreadlist = playerthreadlist
         self.AImanager = AIManager_class()
         
-        self.startCount = 40 #number of players required to start round
-        self.minCount = 20 #min number of connected players (dead or alive) for valid round
-        self.winCount = 20 #number of players alive to end round
+        self.startCount = 2 #number of players required to start round
+        self.minCount = 1 #min number of connected players (dead or alive) for valid round
+        self.winCount = -1 #number of players alive to end round
 
     def run(self):
         while 1:

@@ -58,8 +58,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.gotoTile(self.tileX + 1, self.tileY)
     
     def gotoTile(self, tileX, tileY):
-        # Only move if were not already moving.
-        if not self.moving:
+        # Only move if were not already moving, and if 
+        if not self.moving and tileX != self.tileX and tileY != self.tileY:
             # Figure out what general direction were going, even if we cant go there we have to
             # at least turn
             diffX = tileX - self.tileX
@@ -72,6 +72,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 else: self.direction = self.LEFT
             self.directionChanged = True
 
+            print 'moving', self.step, self.lastTileX, self.lastTileY, self.tileX, self.tileY, tileX, tileY
             # Set the destination
             self.moving = True
             self.lastTileX = self.tileX
@@ -81,6 +82,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.tileY = tileY;
             # Reset the step
             self.step = 0
+            
             
         
     def handleKeyUp(self, evt):
@@ -97,6 +99,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         # Do some attacking
         self.moving = False
         self.attacking = True
+        self._images = self.atk_images
         
         
     def die(self):
@@ -120,25 +123,18 @@ class AnimatedSprite(pygame.sprite.Sprite):
         start = (screenOffset[0] - xdiff + (self.lastTileX - startXTile) * 32, screenOffset[1] - ydiff + (self.lastTileY - startYTile) * 32)
 
         # Animate direction changes first
-        if self.directionChanged is True:
+        if not self.attacking and self.directionChanged is True:
             self._frame = self.direction * self.frames_per_direction
             self.directionChanged = False
             self.image = self._images[self._frame]
         
         # Animate moving by direction
-        if self.moving is True and t - self._last_update > self._delay:
+        if self.moving is True: #and t - self._last_update > self._delay:
             self._frame += 1
             if self._frame >= len(self._images) / 4 + self.direction * self.frames_per_direction: self._frame = self.direction * self.frames_per_direction
             self.image = self._images[self._frame]
             self._last_update = t
-        # Animate attacking
-        elif  self.attacking is True and t - self._last_update > self._delay:
-            #Setup attacking animation
-            self._frame += 1
-            if self._frame >= len(self._images): self._frame = 0
-            self.image = self._images[self._frame]
-            self._last_update = t
-                
+            
             xdstep = 0
             ydstep = 0
             
@@ -157,6 +153,14 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.lastTileX = self.tileX
                 self.lastTileY = self.tileY
                 start = end
+                
+        # Animate attacking
+        elif  self.attacking is True and t - self._last_update > self._delay:
+            #Setup attacking animation
+            self._frame += 1
+            if self._frame >= len(self._images): self._frame = 0
+            self.image = self._images[self._frame]
+            self._last_update = t
            
         #screen.blit(self.image, (screenOffset[0]+xvpCoordinate - (startXTile * tileHeight), screenOffset[1]+yvpCoordinate - (startYTile * tileHeight)))
         #screen.blit(self.image, screenOffset, (xvpCoordinate - (startXTile * tileHeight), yvpCoordinate - (startYTile * tileHeight)) + vpDimensions)
