@@ -235,8 +235,7 @@ class client_class:
         #determine best direction to move
         dir = self.getBestDir(target)
     
-        #wait a little or we will generate too much traffic
-        time.sleep(random.random()/2.0)
+        #send back to server
         self.conn.send(str(dir))    
     
     #if a heartbeat packet is recieved
@@ -302,11 +301,10 @@ if __name__ == "__main__":
                 client.modeHeartbeat(data)
             elif pk_code == constant_class.packet_spawn:
                 client.modeSpawn(data)
-                
-            # Now inform the server that we are ready for more data
-            sock.send(str(constant_class.clientcode))
-             
         else:
-            sock.send(str(constant_class.packet_err))
-                                                                   
+            try:
+                sock.send(str(constant_class.packet_err))
+            except:
+                utils.printConn("Lost connection to server!")
+                sys.exit()
     sock.close()
