@@ -60,7 +60,7 @@ class playerConnectionHandler(threading.Thread):
         if data != constant_class.clientcode:
             print "\033[32mClient Disconnected\033[37m" 
             sys.exit()
-        print "\033[32mClient communicating with GameMaster. Waiting\n\n\033[37m"
+        print "\033[32mClient communicating with GameMaster. Waiting\033[37m"
         
         #This is just a basic frame work simmilar to end product
         while 1:

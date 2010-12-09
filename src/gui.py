@@ -708,6 +708,7 @@ class OnImageButton(Widget):
     def draw(self,surf):
         if self.visible:            
             surf.blit(self.img, self.position)
+
                        
 class Window(Widget, Container):
     

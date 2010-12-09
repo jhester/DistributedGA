@@ -44,14 +44,17 @@ class ObserverGUI:
         self.playerstats = gui.ListBox(position = (2, 150), size = (196, 200), parent = self.win)
         self.playerstats.onItemSelected = self.itemSelected
         
-        self.lbl_title_pos = gui.Label(position = (5, 350), text='Player(id:#): Status - ', parent = self.win)
+        self.lbl_title_pos = gui.Label(position = (5, 350), text='Player (id:#): Status - ', parent = self.win)
         self.lbl_pos = gui.Label(position = (5, 365), text='Location: ( #, # )', parent = self.win)
         self.lbl_health = gui.Label(position = (5, 380), text='Health: # / 25', parent = self.win)
         self.lbl_ai_courage = gui.Label(position = (5, 395), text='AI Courage: #', parent = self.win)
         self.lbl_ai_camper = gui.Label(position = (5, 410), text='AI Camper: #', parent = self.win)
         self.lbl_ai_clingy = gui.Label(position = (5, 425), text='AI Clingy: #', parent = self.win)
         self.lbl_ai_stack = gui.Label(position = (5, 440), text='AI Stack: #', parent = self.win)
-        self.player_img = gui.OnImageButton(utils.load_sliced_sprites(32, 32, 'characters/zelda_atk.png')[0], position = (20,470), parent = self.win)
+        self.player_img_alive = gui.OnImageButton(utils.load_sliced_sprites(32, 32, 'characters/zelda_atk.png')[0], position = (100,420), parent = self.win, enabled = False)
+        self.player_img_dead = gui.OnImageButton(utils.load_sliced_sprites(32, 32, 'characters/zelda_dead.png')[0], position = (100,420), parent = self.win, enabled = False)
+        
+        
     def itemSelected(self, widget):
         self.playerselection = widget.selectedIndex
         
@@ -59,7 +62,12 @@ class ObserverGUI:
     def updatePlayerStats(self, players):
         player =players[self.playerselection]
         stat = 'Alive'
-        if player.isDead(): stat = 'Slain'
+        self.player_img_dead.visible = False
+        self.player_img_alive.visible = True
+        if player.isDead(): 
+            stat = 'Slain'
+            self.player_img_dead.visible = True
+            self.player_img_alive.visible = False
         self.lbl_title_pos.text='Player(id:'+str(player.id)+'): Status - '+str(stat)
         self.lbl_pos.text='Location: ( '+str(player.x)+', '+str(player.y)+' )'
         self.lbl_health.text='Health: '+str(player.health)+' / '+str(constant_class.maxHealth)
