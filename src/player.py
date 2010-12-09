@@ -37,6 +37,14 @@ class player_class:
     #only pack the stuff that could change
     def packSmall(self):
         return (self.x, self.y, self.health)
+    
+    def packBig(self):
+        return (self.x, self.y, self.health, self.id, self.isPlaying, self.AI.get())
+    
+    def loadBig(self, data):
+        (self.x, self.y, self.health, self.id, self.isPlaying, ai) = data
+        self.AI.set(ai)
+        
     def loadSmall(self, data):
         self.x = data[0]
         self.y = data[1]
@@ -220,9 +228,7 @@ class playerManager_class:
 
     #handle players attacking eachother
     def attackPlayers(self):
-        print "a"
         self.lock.acquire()
-        print "b"
         for p1 in self.playerlist:
             if not p1.isDead() and p1.isPlaying:
                 locallist = self.blockManager.getBlock(p1.x, p1.y)
@@ -230,9 +236,7 @@ class playerManager_class:
                     if not p2 == p1 and p2.isPlaying:
                         if p2.x == p1.x and p2.y == p1.y:
                             self.damagePlayer(p2)
-        print "c"
         self.lock.release()
-        print "d"
 
     #deal damage to a player
     def damagePlayer(self, player):        
@@ -295,6 +299,28 @@ class playerManager_class:
 
         return pickle.dumps(list)
 
+    def packBig(self):
+        list = []
+        for player in self.playerlist:
+            list.append((player.id, player.packBig()))
+
+        return pickle.dumps(list)
+        
+    #convert from string to data
+    def loadBig(self, str):
+        list = pickle.loads(str)
+        
+        self.playerlist = []
+        self.lock.acquire()
+        
+        for (id, data) in list:
+            #we should be sending info on player spawns and deaths...
+            player = player_class(0, 0, id)
+            player.loadBig(data)
+            self.playerlist.append(player)
+
+        self.lock.release()
+            
     #convert from string to data
     def loadSmall(self, str):
         list = pickle.loads(str)

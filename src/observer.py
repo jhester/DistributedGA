@@ -60,7 +60,7 @@ class ObserverGUI:
         
         
     def updatePlayerStats(self, players):
-        player =players[self.playerselection]
+        player = players[self.playerselection]
         stat = 'Alive'
         self.player_img_dead.visible = False
         self.player_img_alive.visible = True
@@ -134,9 +134,9 @@ if __name__ == "__main__":
         #recv player id/position
         data = utils.getDataFromSocket(s)
         try:
-            playermanager.loadSmall(data)
+            playermanager.loadBig(data)
         except:
-            print 'Couldnt load round of player data.'
+            utils.printConn('Couldnt load round of player data.')
     
         # Update all the players on the map
         # This will add players if they havent been added
@@ -145,8 +145,9 @@ if __name__ == "__main__":
             mapscene.updatePlayer(player)
             
         # Update the GUI
-        ogui.update(players)
-        ogui.updatePlayerStats(players)
+        if len(players) > 0:
+            ogui.update(players)
+            ogui.updatePlayerStats(players)
         
         # Handle map rendering and updating with movement    
         for evt in gui.setEvents(pygame.event.get()):
@@ -159,8 +160,5 @@ if __name__ == "__main__":
         
         # Flip the display buffer
         pygame.display.flip()
-        
-        # Now inform the server that we are ready for more data
-        s.send(str(constant_class.observercode))
             
     s.close()

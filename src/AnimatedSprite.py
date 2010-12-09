@@ -121,13 +121,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
         start = (screenOffset[0] - xdiff + (self.lastTileX - startXTile) * 32, screenOffset[1] - ydiff + (self.lastTileY - startYTile) * 32)
 
         # Animate direction changes first
-        if not self.attacking and self.directionChanged is True:
+        if not self.attacking and not self.dead and self.directionChanged is True:
             self._frame = self.direction * self.frames_per_direction
             self.directionChanged = False
             self.image = self._images[self._frame]
         
         # Animate moving by direction
-        if self.moving is True: #and t - self._last_update > self._delay:
+        if not self.attacking and not self.dead and self.moving is True: #and t - self._last_update > self._delay:
             self._frame += 1
             if self._frame >= len(self._images) / 4 + self.direction * self.frames_per_direction: self._frame = self.direction * self.frames_per_direction
             self.image = self._images[self._frame]
