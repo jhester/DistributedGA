@@ -132,19 +132,13 @@ if __name__ == "__main__":
     code = -1
     running = True
     while running:
-        print 'gfuck'
 
         #recv player id/position
         try: 
             data = utils.getDataFromSocket(s)
-            print 'gfuck2'
-
             (code, data) = pickle.loads(data)
-            print 'gfuck3'
             if not data == None:
-                print 'gfuck4'
                 playermanager.loadBig(data)
-                print 'gfuck5'
         except: 
             utils.printConn('Couldnt load round of player data.')
     
@@ -154,6 +148,7 @@ if __name__ == "__main__":
         # Update all the players on the map
         # This will add players if they havent been added
         players = playermanager.getPlayerList()
+        print len(players)
         for player in players:
             mapscene.updatePlayer(player)
             

@@ -106,6 +106,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.dead = False
         self.attacking = False
         self.directionChanged = False
+        self.step = 0
+        self.lastTileX = 0
+        self.lastTileY = 0
         
         # Set our first image.
         self._frame = self.direction * self.frames_per_direction
