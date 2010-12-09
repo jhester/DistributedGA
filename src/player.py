@@ -51,6 +51,11 @@ class player_class:
 
     def setAI(self,vars):
         self.AI.set(vars)
+        
+    def __str__( self ) :
+        status = 'Alive'
+        if self.isDead(): status = 'Slain'
+        return "Player (id:" + str(self.id)+"): Status - "+status
 
 class blockManager_class:
     def __init__(self, map):
