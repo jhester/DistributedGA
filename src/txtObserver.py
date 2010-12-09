@@ -64,12 +64,14 @@ running = True
 while running:
     #recv player id/position
     data = getDataFromSocket(s)
-    playermanager.loadSmall(data)                
+    (c, data) = pickle.loads(data)
+    playermanager.loadBig(data)                
 
     #convert dictionary to list
     list = []
     for player in playermanager.getPlayerList():
-        list.append((player.x, player.y))
+        if player.isPlaying and not player.isDead():
+            list.append((player.x, player.y))
 
     os.system('clear')
     map.printGrid(list)
