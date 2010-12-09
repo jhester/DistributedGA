@@ -27,4 +27,4 @@ class constant_class:
 	game_spawn = 2
 
 	#gamemaster
-	game_speed = 1.5
+	game_speed = 0.1
