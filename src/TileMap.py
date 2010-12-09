@@ -114,10 +114,10 @@ class TileMap:
             # Check to see if were dying 
             if player.isDead():
                 self.players[player.id].die()
-           # if self.isPlayerAttacking(player):
-            #    self.players[player.id].attack()
-            
-            self.players[player.id].gotoTile(player.x, player.y)
+            if player.attacking:
+                self.players[player.id].attack()
+            else:
+                self.players[player.id].gotoTile(player.x, player.y)
                                     
         else:
             self.players[player.id] = AnimatedSprite.AnimatedSprite(utils.load_sliced_sprites(32, 32, 'characters/zelda_move.png'), player.x,player.y) 
