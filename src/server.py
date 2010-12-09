@@ -284,7 +284,7 @@ if __name__ == "__main__":
     map = mapLoader_class('level'+str(maplvl))
     playermanager = playerManager_class(map)
     playerthreadlist = []
-    heartbeatDelay = 5
+    heartbeatDelay = 1
 
     moveevent = threading.Event()
     moveevent2 = threading.Event()
