@@ -11,8 +11,8 @@ class constant_class:
 	mapwidth = 40 
 	mapheight = 40
 
-        #a way to convert from direction to position
-        #0-up  1-right 2-down 3-left 4-no move
+    #a way to convert from direction to position
+    #0-up  1-right 2-down 3-left 4-no move
 	directionconvert = [(0,-1), (1,0), (0,1), (-1,0), (0,0)]
 
 	#packet codes
@@ -27,4 +27,4 @@ class constant_class:
 	game_spawn = 2
 
 	#gamemaster
-	game_speed = 0.1
+	game_speed = 0.2
