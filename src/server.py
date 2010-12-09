@@ -16,6 +16,7 @@ class genericConnection_class(threading.Thread):
 
     def run(self):
         global playerthreadlist
+        global observerthreadlist
         
         #we are expecting this conn to send identification (player/observer)
         data = int(self.conn.recv(1024))
@@ -30,7 +31,9 @@ class genericConnection_class(threading.Thread):
             #handle observer clients
         elif data == constant_class.observercode:
             print "GenericConnection starting observer"
-            (observerConnectionHandler(conn)).start()
+            connthread = observerConnectionHandler(conn) 
+            connthread.start()
+            observerthreadlist.append(connthread)
 
             #unknown clients
         else:
@@ -161,6 +164,7 @@ class observerConnectionHandler(threading.Thread):
     def __init__(self, conn):
         threading.Thread.__init__(self)
         self.conn = conn
+        self.runState = -1
         
     def run(self):
         global playermanager
@@ -174,19 +178,24 @@ class observerConnectionHandler(threading.Thread):
             
             #send player id/positions
             try:
-                self.conn.sendall(playermanager.packBig())
+                self.conn.sendall(pickle.dumps((self.runstate,playermanager.packBig())))
+                self.runState = -1
             except:
                 utils.printConn("Observer disconnected")
                 return
-
+            
+    def sendState(self):
+        self.runState = constant_class.game_spawn
+            
 #responcible for the game as a whole
 #spawning new players, determining game end,
 #doing damage
 class gameMaster(threading.Thread):
-    def __init__(self, playermanager, playerthreadlist, moveevent, moveevent2):
+    def __init__(self, playermanager, playerthreadlist, observerthreadlist, moveevent, moveevent2):
         threading.Thread.__init__(self)
         self.playermanager = playermanager
         self.playerthreadlist = playerthreadlist
+        self.observerthreadlist = observerthreadlist
         self.AImanager = AIManager_class()
         self.moveevent = moveevent
         self.moveevent2 = moveevent2
@@ -228,6 +237,8 @@ class gameMaster(threading.Thread):
         #tell threads to do spawn
         for thread in playerthreadlist:
             thread.runState = constant_class.game_spawn
+        for thread in observerthreadlist:
+            thread.sendState()
                                         
     def modeMain(self):
         global moveevent
@@ -235,7 +246,7 @@ class gameMaster(threading.Thread):
 
         if self.roundIsValid():
             utils.printGM("GameMaster: Round started")
-
+                
         while self.roundIsValid():
             #allow movement
             moveevent.clear()
@@ -284,11 +295,12 @@ if __name__ == "__main__":
     map = mapLoader_class('level'+str(maplvl))
     playermanager = playerManager_class(map)
     playerthreadlist = []
+    observerthreadlist = []
     heartbeatDelay = 1
 
     moveevent = threading.Event()
     moveevent2 = threading.Event()
-    gamemaster = gameMaster(playermanager, playerthreadlist, moveevent, moveevent2)
+    gamemaster = gameMaster(playermanager, playerthreadlist, observerthreadlist, moveevent, moveevent2)
     gamemaster.start()
     
     #initlize socket

@@ -77,11 +77,8 @@ def load_char_map(map_file):
 def getDataFromSocket(sck):
     data = ""
     sck.settimeout(None)
-
-    data = sck.recv(6144)
-    return data
-
-    sck.settimeout(0.5)
+    data = sck.recv(1024)
+    sck.settimeout(0.1)
     
     while 1:
         line = ""
@@ -94,11 +91,6 @@ def getDataFromSocket(sck):
             break
         
         data += line
-
-    if data == "":
-        sys.stderr.write("No data recieved\n")
-        sys.exit()
-        
     return data
 
 def printErr(s):

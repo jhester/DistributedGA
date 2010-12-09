@@ -129,14 +129,20 @@ if __name__ == "__main__":
     
     #main loop
     time = 0
+    code = -1
     running = True
     while running:
         #recv player id/position
-        data = utils.getDataFromSocket(s)
-        try:
-            playermanager.loadBig(data)
-        except:
+        try: 
+            data = utils.getDataFromSocket(s)
+            (code, data) = pickle.loads(data)
+            if not data == None:
+                playermanager.loadBig(data)
+        except: 
             utils.printConn('Couldnt load round of player data.')
+    
+        if code == constant_class.game_spawn:
+            mapscene.reset()
     
         # Update all the players on the map
         # This will add players if they havent been added

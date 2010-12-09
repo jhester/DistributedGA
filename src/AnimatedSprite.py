@@ -7,6 +7,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, images, tileX, tileY, start_direction=0, frames_per_direction=3, fps=4, map=None):
         pygame.sprite.Sprite.__init__(self)
         self._images = images
+        self.move_images = images
         #Animations: 0-up  1-right 2-down 3-left
         self.UP = 0
         self.RIGHT = 1
@@ -98,7 +99,17 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.moving = False
         self.attacking = True
         self._images = self.atk_images
+       
+    def live(self):
+        self._images = self.move_images   
+        self.moving = False;
+        self.dead = False
+        self.attacking = False
+        self.directionChanged = False
         
+        # Set our first image.
+        self._frame = self.direction * self.frames_per_direction
+        self.image = self._images[self._frame]
         
     def die(self):
         # Die, no more movement, etc, just display dead person frame
