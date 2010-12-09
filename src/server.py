@@ -129,7 +129,6 @@ class playerConnectionHandler(threading.Thread):
             if self.player.isDead():
                 self.runState = constant_class.game_wait
                 self.player.isPlaying = False
-                print "Player "+str(self.player.id)+" died!"
 
     #send the player a spawn packet then go into play mode
     def modeSpawn(self):
@@ -200,9 +199,9 @@ class gameMaster(threading.Thread):
         self.moveevent = moveevent
         self.moveevent2 = moveevent2
         
-        self.startCount = 20 #number of players required to start round
-        self.minCount = 10 #min number of connected players (dead or alive) for valid round
-        self.winCount = 10 #number of players alive to end round
+        self.startCount = 50 #number of players required to start round
+        self.minCount = 25 #min number of connected players (dead or alive) for valid round
+        self.winCount = 25 #number of players alive to end round
 
     def run(self):
         while 1:
