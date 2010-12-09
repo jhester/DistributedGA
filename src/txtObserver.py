@@ -34,18 +34,18 @@ def getDataFromSocket(sck):
     return data    
 
 #don't be hatin
-#if not len(sys.argv) == 3:
-#    print "Usage python client.py <host> <port>"
-#    sys.exit()
+if not len(sys.argv) == 3:
+    print "Usage python txtObserver.py <host> <port>"
+    sys.exit()
 
 
 
 #store host and port from command line
-#host = sys.argv[1]
-#port = int(sys.argv[2])
+host = sys.argv[1]
+port = int(sys.argv[2])
 
-host = "dragon1.cs.clemson.edu"
-port = 5555
+#host = "dragon1.cs.clemson.edu"
+#port = 5555
 
 #try and connect to our server
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

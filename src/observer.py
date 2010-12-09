@@ -148,7 +148,7 @@ if __name__ == "__main__":
         # Update all the players on the map
         # This will add players if they havent been added
         players = playermanager.getPlayerList()
-        print len(players)
+        #print len(players)
         for player in players:
             mapscene.updatePlayer(player)
             

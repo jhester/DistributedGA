@@ -73,7 +73,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 else: self.direction = self.LEFT
             self.directionChanged = True
 
-            print 'moving', self.step, self.lastTileX, self.lastTileY, self.tileX, self.tileY, tileX, tileY
+            #print 'moving', self.step, self.lastTileX, self.lastTileY, self.tileX, self.tileY, tileX, tileY
             # Set the destination
             self.moving = True
             self.lastTileX = self.tileX

@@ -16,7 +16,7 @@ class player_class:
         self.isPlaying = False #is player playing current round?
         self.AI = AI_class()
         self.nextdir = -1
-        
+        self.attacking = False
     #update the players position based on a direction
     def move(self, map):
         #-1 could be set if we try to move before thinking
@@ -39,10 +39,10 @@ class player_class:
         return (self.x, self.y, self.health)
     
     def packBig(self):
-        return (self.x, self.y, self.health, self.id, self.isPlaying, self.AI.get())
+        return (self.x, self.y, self.health, self.id, self.isPlaying, self.attacking, self.AI.get())
     
     def loadBig(self, data):
-        (self.x, self.y, self.health, self.id, self.isPlaying, ai) = data
+        (self.x, self.y, self.health, self.id, self.isPlaying, self.attacking, ai) = data
         self.AI.set(ai)
         
     def loadSmall(self, data):
@@ -197,6 +197,7 @@ class playerManager_class:
 
             #set player as playing
             player.isPlaying = True
+            player.attacking = False
         self.lock.release()
 
     #remove a player from all lists
@@ -222,7 +223,7 @@ class playerManager_class:
 
         #move player
         player.move(self.map)
-
+        player.attacking = False
         #update blocks
         self.blockManager.updatePlayer(oldx, oldy, player)
 
@@ -235,6 +236,7 @@ class playerManager_class:
                 for p2 in locallist:
                     if not p2 == p1 and p2.isPlaying:
                         if p2.x == p1.x and p2.y == p1.y:
+                            p2.attacking = True
                             self.damagePlayer(p2)
         self.lock.release()
 
