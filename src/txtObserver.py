@@ -52,7 +52,7 @@ print "Observer Connected on "+str(host)+":"+str(port)
 s.send(str(constant_class.observercode))
 
 #recv map level
-maplvl = s.recv(64)
+maplvl = s.recv(1)
 map = mapLoader_class("level"+maplvl)
 
 #setup playermanager

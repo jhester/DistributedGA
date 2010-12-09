@@ -4,7 +4,7 @@ class constant_class:
 	clientcode = 0
 
 	#client stuff
-	maxHealth = 25
+	maxHealth = 50
 
 	#I don't think this is used
 	#please check, and delete if not used
@@ -25,3 +25,6 @@ class constant_class:
 	game_wait = 0
 	game_main = 1
 	game_spawn = 2
+
+	#gamemaster
+	game_speed = 0.1

@@ -34,7 +34,7 @@ class genericConnection_class(threading.Thread):
 
             #unknown clients
         else:
-            print "\033[31mERROR: Recieved unknown code from client '"+str(data)+"'\033[37m"
+            utils.printErr("Recieved unknown code from client '"+str(data)+"'")
 
 class playerConnectionHandler(threading.Thread):
     #start with thread with a unique id and the connection for the client
@@ -55,27 +55,12 @@ class playerConnectionHandler(threading.Thread):
         #send maplvl
         self.trySend(str(maplvl))
         
-        # Block till we get the response back
-        data = int(self.conn.recv(1024))
-        if data != constant_class.clientcode:
-            print "\033[32mClient Disconnected\033[37m" 
-            sys.exit()
-        print "\033[32mClient communicating with GameMaster. Waiting\033[37m"
-        
         #This is just a basic frame work simmilar to end product
         while 1:
             self.modeHeartbeat()
             self.modeSpawn()
             self.modeMain()      
             
-            # Now we need to block until we get a response saying the observer
-            # has done everything it needs to do
-            # Block till we get the response back
-            data = int(self.conn.recv(1024))
-            if data != constant_class.clientcode:
-                print "\033[32mClient Disconnected\033[37m" 
-                sys.exit()      
-
     def modeHeartbeat(self):
         global heartbeatDelay
 
@@ -83,8 +68,7 @@ class playerConnectionHandler(threading.Thread):
         if not self.runState == constant_class.game_wait:
             return
         
-        self.player.isPlaying = False
-        
+        self.player.isPlaying = False        
         while self.runState == constant_class.game_wait:
             #send a heart beat
             self.trySend(pickle.dumps((constant_class.packet_heartbeat, heartbeatDelay)))
@@ -92,7 +76,7 @@ class playerConnectionHandler(threading.Thread):
             try:
                 pk_code = int(self.conn.recv(1024)[0])
             except:
-                print "\033[33mClient lost conn, heartbeat\033[37m"
+                utils.printConn("Client lost conn, heartbeat")
                 playermanager.removePlayer(self.player)
                 sys.exit()
             
@@ -101,11 +85,13 @@ class playerConnectionHandler(threading.Thread):
 
     def modeMain(self):
         global playermanager
-
+        global moveevent
+        global moveevent2
+        
         #if we are not supposed to be playing
         if not self.runState == constant_class.game_main:
             return
-        
+
         self.player.isPlaying = True
 
         #stay in this mode as long as we are alive
@@ -118,20 +104,29 @@ class playerConnectionHandler(threading.Thread):
                 self.data = int(self.conn.recv(1024)[0])
             except:
                 #if we recved nothing then int will fail
-                print "\033[33mClient lost conn, main\033[37m"
+                utils.printConn("Client lost conn, main mode")
                 playermanager.removePlayer(self.player)
+                self.conn.close()
                 sys.exit()
                 
             #if the client had an error assume they aren't going to move
             if self.data == constant_class.packet_err:
                 self.data = 4
 
-            #move the player
-            playermanager.movePlayerDir(self.player, self.data)            
+            #wait for second move flag
+            moveevent2.wait()
 
+            #set the next direction
+            self.player.nextdir = self.data
+
+            #wait for move flag
+            moveevent.wait()
+            
             #check for player death
             if self.player.isDead():
                 self.runState = constant_class.game_wait
+                self.player.isPlaying = False
+                print "Player "+str(self.player.id)+" died!"
 
     #send the player a spawn packet then go into play mode
     def modeSpawn(self):
@@ -145,17 +140,6 @@ class playerConnectionHandler(threading.Thread):
         if not self.conn.recv(64)[0] == str(constant_class.packet_err):
             self.runState = constant_class.game_main
 
-    #respawn our player
-    def respawn(self, AImanager):
-        #don't try to respawn if we don't have a player
-        if self.player == None:
-            return
-
-        global playermanager
-        playermanager.respawn(self.player)
-        self.player.setAI(AImanager.get())
-        self.runState = constant_class.game_spawn
-
     #getter for id
     def getId(self):
         return self.id
@@ -164,19 +148,11 @@ class playerConnectionHandler(threading.Thread):
     def getPlayerPos(self):
         return (self.player.x, self.player.y, self.player.health)
 
-    #attack all players on the same tile
-    def doDamage(self):
-        if self.player == None:
-            return
-
-        global playermanager
-        playermanager.attack(self.player)
-        
     def trySend(self, s):
         try:
             self.conn.sendall(s)
         except:
-            print "\033[33mClient lost conn, trySend\033[37m"
+            utils.printConn("Client lost conn, trySend")
             playermanager.removePlayer(self.player)
             sys.exit()
                                                 
@@ -193,43 +169,31 @@ class observerConnectionHandler(threading.Thread):
         #send the map
         self.conn.send(str(maplvl))
         
-        # Block till we get the response back
-        data = int(self.conn.recv(1024))
-        if data != constant_class.observercode:
-            print "\033[32mObserver Disconnected\033[37m" 
-            sys.exit()
-        print "\033[32mObserver communicating with GameMaster. Starting\n\n\033[37m"
-            
         while 1:
+            time.sleep(0.25)
+            
             #send player id/positions
             try:
-                self.conn.send(playermanager.packSmall())
-
-                # Now we need to block until we get a response saying the observer
-                # has done everything it needs to do
-                # Block till we get the response back
-                data = int(self.conn.recv(1024))
-                if data != constant_class.observercode:
-                    print "\033[32mObserver Disconnected\033[37m" 
-                    sys.exit()
-                
+                self.conn.sendall(playermanager.packSmall())
             except:
-                print "\033[32mObserver disconnected\033[37m"
+                utils.printConn("Observer disconnected")
                 return
 
 #responcible for the game as a whole
 #spawning new players, determining game end,
 #doing damage
 class gameMaster(threading.Thread):
-    def __init__(self, playermanager, playerthreadlist):
+    def __init__(self, playermanager, playerthreadlist, moveevent, moveevent2):
         threading.Thread.__init__(self)
         self.playermanager = playermanager
         self.playerthreadlist = playerthreadlist
         self.AImanager = AIManager_class()
+        self.moveevent = moveevent
+        self.moveevent2 = moveevent2
         
-        self.startCount = 4 #number of players required to start round
-        self.minCount = 1 #min number of connected players (dead or alive) for valid round
-        self.winCount = -1 #number of players alive to end round
+        self.startCount = 20 #number of players required to start round
+        self.minCount = 10 #min number of connected players (dead or alive) for valid round
+        self.winCount = 10 #number of players alive to end round
 
     def run(self):
         while 1:
@@ -247,6 +211,7 @@ class gameMaster(threading.Thread):
         print "\033[32mGameMaster: Not enough players connected\033[37m"
         for thread in self.playerthreadlist:
             thread.runState = constant_class.game_wait
+
         while len(self.playermanager.getPlayerList()) < self.startCount:
             time.sleep(5)
 
@@ -255,46 +220,52 @@ class gameMaster(threading.Thread):
         if len(self.playermanager.getPlayerList()) < self.startCount:
             return
         
-        print "\033[32mGameMaster: Spawning players\033[37m"
+        utils.printGM("GameMaster: Spawning players")
         
         #respawn all players
-        self.playermanager.emptyDeadList()
-        for thread in self.playerthreadlist:
-            thread.respawn(self.AImanager)
+        self.playermanager.respawnPlayers(self.AImanager)
 
-        #wait until atleast the minimum # of players have spawned
-        while self.playermanager.getPlayingCount() < self.minCount:
-            time.sleep(1)
+        #tell threads to do spawn
+        for thread in playerthreadlist:
+            thread.runState = constant_class.game_spawn
                                         
     def modeMain(self):
-        if self.roundIsValid():
-            print "\033[32mGameMaster: Round started\033[37m"
+        global moveevent
+        global moveevent2
 
-        self.roundWon = False
+        if self.roundIsValid():
+            utils.printGM("GameMaster: Round started")
+
         while self.roundIsValid():
-            #prevent players from moving while we do damage
-            time.sleep(0.5)
-            self.playermanager.pause()
-            
-            #tell all threads to 'attack'
-            for thread in self.playerthreadlist:
-                thread.doDamage()
-            
-            #allow movement again
-            self.playermanager.resume()
+            #allow movement
+            moveevent.clear()
+            moveevent2.set()
+
+            #slow the game down a bit
+            time.sleep(constant_class.game_speed)
+
+            #stop movement
+            moveevent2.clear()
+            moveevent.set()
+
+            #update the positions
+            self.playermanager.movePlayers()
+
+            #deal out damage/death etc
+            self.playermanager.attackPlayers()
 
             #check for round win
-            if self.roundWon:
-                return
+            if self.playermanager.getPlayingCount() < self.winCount:
+                print "\033[32mGameMaster: End count ("+str(self.winCount)+") reached, starting new game!\033[37m"
+                for thread in playerthreadlist:
+                    thread.runState = constant_class.game_wait
+                self.AImanager.set(self.playermanager.getLiveList())
+                break
 
-    #check for win conditions
-    def playerDied(self):
-        if self.playermanager.getPlayingCount() < self.winCount:
-            print "\033[32mGameMaster: End count ("+str(self.winCount)+") reached, starting new game!\033[37m"
-            self.AImanager.empty()
-            self.AImanager.set(self.playermanager.getLiveList())
-            self.roundWon = True
-                                                                        
+            time.sleep(0.1)
+
+        moveevent.set()
+        moveevent2.set()
 
     #function to check if the current round is vail (enough players etc)
     def roundIsValid(self):
@@ -313,10 +284,11 @@ if __name__ == "__main__":
     map = mapLoader_class('level'+str(maplvl))
     playermanager = playerManager_class(map)
     playerthreadlist = []
-    heartbeatDelay = 5
+    heartbeatDelay = 1
 
-    gamemaster = gameMaster(playermanager, playerthreadlist)
-    playermanager.gamemaster = gamemaster
+    moveevent = threading.Event()
+    moveevent2 = threading.Event()
+    gamemaster = gameMaster(playermanager, playerthreadlist, moveevent, moveevent2)
     gamemaster.start()
     
     #initlize socket
@@ -333,5 +305,3 @@ if __name__ == "__main__":
         (genericConnection_class(conn)).start()
 
     s.close()
-    
-                
