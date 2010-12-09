@@ -114,7 +114,7 @@ class TileMap:
             # Check to see if were dying 
             if player.isDead():
                 self.players[player.id].die()
-            if player.attacking:
+            elif player.attacking:
                 self.players[player.id].attack()
             else:
                 self.players[player.id].gotoTile(player.x, player.y)
@@ -218,7 +218,11 @@ class TileMap:
         list = []
         for key in self.players.keys():
             list.append(self.players[key])
+            if self.players[key].dead:
+                self.players[key].update(self.time, screen, self.xvpCoordinate, self.yvpCoordinate, self.vpRenderOffset, self.tileWidth, self.vpDimensions)
+       
         for player in list:
+            if not player.dead:
                 player.update(self.time, screen, self.xvpCoordinate, self.yvpCoordinate, self.vpRenderOffset, self.tileWidth, self.vpDimensions)
        
         # Update overlord if applicable, make sure of collisions

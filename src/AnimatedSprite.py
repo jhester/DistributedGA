@@ -1,6 +1,7 @@
 import pygame
 import constant
 import math
+import random
 
 class AnimatedSprite(pygame.sprite.Sprite):
     
@@ -30,6 +31,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.lastTileY = tileY
         self.moving = False
         self.rect = pygame.Rect(tileX * 32, tileY * 32, 32, 32)
+        self.atkoffx = -40
+        self.atkoffy = -40
         
         # Status booleans
         self.dead = False
@@ -81,6 +84,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
         
             self.tileX = tileX
             self.tileY = tileY;
+            
+            # Reset attack offsets
+            self.atkoffx = -40
+            self.atkoffy = -40
             # Reset the step
             self.step = 0
             
@@ -99,6 +106,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.moving = False
         self.attacking = True
         self._images = self.atk_images
+        
+        # Set the offsets so we can see everyone fighting.
+        if self.atkoffx == -40 and self.atkoffy == -40:
+            self.atkoffx = random.randrange(-32, 32)
+            self.atkoffy = random.randrange(-32, 32)
        
     def live(self):
         self._images = self.move_images   
@@ -141,7 +153,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.image = self._images[self._frame]
         
         # Animate moving by direction
-        if not self.attacking and not self.dead and self.moving is True: #and t - self._last_update > self._delay:
+        if not self.attacking and not self.dead and self.moving is True and t - self._last_update > self._delay:
             self._frame += 1
             if self._frame >= len(self._images) / 4 + self.direction * self.frames_per_direction: self._frame = self.direction * self.frames_per_direction
             self.image = self._images[self._frame]
@@ -173,7 +185,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
             if self._frame >= len(self._images): self._frame = 0
             self.image = self._images[self._frame]
             self._last_update = t
-           
+            
+            
+            # Now edit the coordinates based on direction so that it looks like were fighting
+            start = (start[0] + self.atkoffx, start[1] + self.atkoffy)
+
         #screen.blit(self.image, (screenOffset[0]+xvpCoordinate - (startXTile * tileHeight), screenOffset[1]+yvpCoordinate - (startYTile * tileHeight)))
         #screen.blit(self.image, screenOffset, (xvpCoordinate - (startXTile * tileHeight), yvpCoordinate - (startYTile * tileHeight)) + vpDimensions)
         screen.blit(self.image, start)
