@@ -129,7 +129,6 @@ class playerConnectionHandler(threading.Thread):
             if self.player.isDead():
                 self.runState = constant_class.game_wait
                 self.player.isPlaying = False
-                print "Player "+str(self.player.id)+" died!"
 
     #send the player a spawn packet then go into play mode
     def modeSpawn(self):
@@ -178,7 +177,7 @@ class observerConnectionHandler(threading.Thread):
             
             #send player id/positions
             try:
-                self.conn.sendall(pickle.dumps((self.runstate,playermanager.packBig())))
+                self.conn.sendall(pickle.dumps((self.runState,playermanager.packBig())))
                 self.runState = -1
             except:
                 utils.printConn("Observer disconnected")
