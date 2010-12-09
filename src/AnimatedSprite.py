@@ -23,7 +23,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.frames_per_direction = frames_per_direction
         self.direction = start_direction
         self.directionChanged = False
-        self.velocity = 12
+        self.velocity = 18
         self.step = 0;
         self.tileX = tileX
         self.lastTileX = tileX
@@ -31,8 +31,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.lastTileY = tileY
         self.moving = False
         self.rect = pygame.Rect(tileX * 32, tileY * 32, 32, 32)
-        self.atkoffx = -40
-        self.atkoffy = -40
+        # This is used to offset each player a little bit so they dont overlap on a tile, and to make it sem more dynamic
+        self.atkoffx = random.randrange(-16, 16)
+        self.atkoffy = random.randrange(-16, 16)
+        self.animoff = random.randrange(-70, 70, 10)
         
         # Status booleans
         self.dead = False
@@ -85,9 +87,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.tileX = tileX
             self.tileY = tileY;
             
-            # Reset attack offsets
-            self.atkoffx = -40
-            self.atkoffy = -40
             # Reset the step
             self.step = 0
             
@@ -106,12 +105,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.moving = False
         self.attacking = True
         self._images = self.atk_images
-        
-        # Set the offsets so we can see everyone fighting.
-        if self.atkoffx == -40 and self.atkoffy == -40:
-            self.atkoffx = random.randrange(-32, 32)
-            self.atkoffy = random.randrange(-32, 32)
-       
+
     def live(self):
         self._images = self.move_images   
         self.moving = False;
@@ -145,7 +139,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
         ydiff = yvpCoordinate - startYTile * tileHeight
             
         start = (screenOffset[0] - xdiff + (self.lastTileX - startXTile) * 32, screenOffset[1] - ydiff + (self.lastTileY - startYTile) * 32)
-
+        start = (start[0] + self.atkoffx, start[1] + self.atkoffy)
+        
         # Animate direction changes first
         if not self.attacking and not self.dead and self.directionChanged is True:
             self._frame = self.direction * self.frames_per_direction
@@ -171,15 +166,17 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 xdstep = (end[0] - start[0]) / self.velocity
                 ydstep = (end[1] - start[1]) / self.velocity
                 start = (start[0] + xdstep * self.step, start[1] + ydstep * self.step)
+                #start = (start[0] + self.atkoffx, start[1] + self.atkoffy)
             else:
                 self.step = 0  
                 self.moving = False
                 self.lastTileX = self.tileX
                 self.lastTileY = self.tileY
                 start = end
+                end = (end[0] + self.atkoffx, end[1] + self.atkoffy)
                 
         # Animate attacking
-        elif  self.attacking is True and t - self._last_update > self._delay:
+        elif  self.attacking is True and t - self._last_update > (self._delay+self.animoff):
             #Setup attacking animation
             self._frame += 1
             if self._frame >= len(self._images): self._frame = 0
@@ -188,7 +185,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
             
             
             # Now edit the coordinates based on direction so that it looks like were fighting
-            start = (start[0] + self.atkoffx, start[1] + self.atkoffy)
+            #start = (start[0] + self.atkoffx, start[1] + self.atkoffy)
 
         #screen.blit(self.image, (screenOffset[0]+xvpCoordinate - (startXTile * tileHeight), screenOffset[1]+yvpCoordinate - (startYTile * tileHeight)))
         #screen.blit(self.image, screenOffset, (xvpCoordinate - (startXTile * tileHeight), yvpCoordinate - (startYTile * tileHeight)) + vpDimensions)
