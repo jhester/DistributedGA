@@ -15,16 +15,24 @@ class player_class:
         self.id = id #unique player id
         self.isPlaying = False #is player playing current round?
         self.AI = AI_class()
+        self.nextdir = -1
         
     #update the players position based on a direction
-    def moveByDirection(self, direction, map):
-        nextposx = self.x+constant_class.directionconvert[direction][0]
-        nextposy = self.y+constant_class.directionconvert[direction][1]
+    def move(self, map):
+        #-1 could be set if we try to move before thinking
+        if self.nextdir == -1:
+            return
+        
+        nextposx = self.x+constant_class.directionconvert[self.nextdir][0]
+        nextposy = self.y+constant_class.directionconvert[self.nextdir][1]
 
         #make sure our new position is reachable        
         if map.isWalkable(nextposx,nextposy):
             self.x = nextposx
             self.y = nextposy
+
+        #reset our nextdir
+        self.netdir = -1
 
     #only pack the stuff that could change
     def packSmall(self):
@@ -45,6 +53,7 @@ class player_class:
         self.x = x
         self.y = y
         self.health = constant_class.maxHealth
+        self.nextdir = -1
 
     def getAI(self):
         return self.AI.get()
@@ -125,14 +134,13 @@ class blockManager_class:
         
 #class to manage all players, creation/deletion etc
 class playerManager_class:
-    def __init__(self, map, gamemaster=None):
+    def __init__(self, map):
         self.deadlist = []
         self.playerlist = []
         self.map = map
         self.prevID = 0
         self.blockManager = blockManager_class(map)
         self.lock = threading.Lock()
-        self.gamemaster = gamemaster
 
     #creates and returns a new player object
     #also store this player in this manager
@@ -157,7 +165,7 @@ class playerManager_class:
         return newplayer
 
     #bring players back to life
-    def respawnPlayers(self):
+    def respawnPlayers(self, aimanager):
         self.lock.acquire()
         self.deadlist = []
 
@@ -172,6 +180,7 @@ class playerManager_class:
 
             #set the player to new condition
             player.respawn(x,y)
+            player.setAI(aimanager.get())
 
             #set player as playing
             player.isPlaying = True
@@ -185,33 +194,40 @@ class playerManager_class:
         self.removeFromDeadList(player)
         self.lock.release()
 
-    def movePlayerDir(self, player, direction):
-        #don't allow movement while paused
-        self.running.wait()
-
+    def movePlayers(self):
+        self.lock.acquire()
+        for player in self.playerlist:
+            if player.isPlaying and not player.isDead():
+                self.movePlayerDir(player)
+                
+        self.lock.release()
+        
+    def movePlayerDir(self, player):
         #record initial position
         oldx = player.x
         oldy = player.y
 
         #move player
-        player.moveByDirection(direction, self.map)
+        player.move(self.map)
 
         #update blocks
         self.blockManager.updatePlayer(oldx, oldy, player)
 
     #handle players attacking eachother
     def attackPlayers(self):
+        print "a"
         self.lock.acquire()
+        print "b"
         for p1 in self.playerlist:
-            if p1.isDead() or not p1.isPlaying:
-                pass
-        
-            locallist = self.blockManager.getBlock(p1.x, p1.y)
-            for p2 in locallist:
-                if not p2 == p1 and not p2.isDead() and p2.isPlaying:
-                    if p2.x == p1.x and p2.y == p1.y:
-                        self.damagePlayer(p2)
+            if not p1.isDead() and p1.isPlaying:
+                locallist = self.blockManager.getBlock(p1.x, p1.y)
+                for p2 in locallist:
+                    if not p2 == p1 and p2.isPlaying:
+                        if p2.x == p1.x and p2.y == p1.y:
+                            self.damagePlayer(p2)
+        print "c"
         self.lock.release()
+        print "d"
 
     #deal damage to a player
     def damagePlayer(self, player):        
@@ -219,12 +235,9 @@ class playerManager_class:
             player.health -= 1
             if player.isDead():
                 self.addPlayerToDeadList(player)
-                if not self.gamemaster == None:
-                    self.gamemaster.playerDied()
 
     #a list to keep track of dead players
     def addPlayerToDeadList(self, player):
-        self.lock.acquire()
         if not player.isDead():
             print "Warning: Adding living player("+str(player.id)+") to dead list!"
             
@@ -232,7 +245,6 @@ class playerManager_class:
             self.deadlist.append(player)
 
         self.blockManager.removePlayer(player)
-        self.lock.release()
 
     def removeFromDeadList(self, player):
         #is there a better way than try statements?
@@ -275,7 +287,7 @@ class playerManager_class:
         for player in self.playerlist:
             if player.isPlaying:
                 list.append((player.id, player.packSmall()))
-            
+
         return pickle.dumps(list)
 
     #convert from string to data
