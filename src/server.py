@@ -178,7 +178,7 @@ class observerConnectionHandler(threading.Thread):
             
             #send player id/positions
             try:
-                self.conn.sendall(pickle.dumps((self.runstate,playermanager.packBig())))
+                self.conn.sendall(pickle.dumps((self.runState,playermanager.packBig())))
                 self.runState = -1
             except:
                 utils.printConn("Observer disconnected")

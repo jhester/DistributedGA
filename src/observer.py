@@ -115,7 +115,7 @@ if __name__ == "__main__":
     mapscene = TileMap.TileMap("level"+maplvl)
     
     # Confirm reception
-    s.send(str(constant_class.observercode))
+    #s.send(str(constant_class.observercode))
     
     #setup playermanager
     playermanager = playerManager_class(map)
@@ -132,18 +132,25 @@ if __name__ == "__main__":
     code = -1
     running = True
     while running:
+        print 'gfuck'
+
         #recv player id/position
         try: 
             data = utils.getDataFromSocket(s)
+            print 'gfuck2'
+
             (code, data) = pickle.loads(data)
+            print 'gfuck3'
             if not data == None:
+                print 'gfuck4'
                 playermanager.loadBig(data)
+                print 'gfuck5'
         except: 
             utils.printConn('Couldnt load round of player data.')
     
         if code == constant_class.game_spawn:
             mapscene.reset()
-    
+        
         # Update all the players on the map
         # This will add players if they havent been added
         players = playermanager.getPlayerList()
