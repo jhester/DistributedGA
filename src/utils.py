@@ -102,10 +102,10 @@ def getDataFromSocket(sck):
     return data
 
 def printErr(s):
-    sys.stderr.write("\033[31m" + str(s) + "\033[37m")
+    sys.stderr.write("\033[31mERROR:" + str(s) + "\033[37m\n")
 
 def printConn(s):
-    sys.stderr.write("\033[33m" + str(s) + "\033[37m")
+    sys.stderr.write("\033[33m" + str(s) + "\033[37m\n")
 
 def printGM(s):
-    sys.stderr.write("\033[32m" + str(s) + "\033[37m")
+    sys.stderr.write("\033[32m" + str(s) + "\033[37m\n")
